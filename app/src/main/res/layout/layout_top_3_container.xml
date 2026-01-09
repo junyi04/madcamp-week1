@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <!-- Top3 가로 영역 -->
+    <LinearLayout
+        android:id="@+id/layout_top_3_root"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="5dp"
+        android:layout_marginVertical="5dp" />
+
+    <TextView
+        android:id="@+id/tv_remaining_rank_title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="10dp"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginBottom="10dp"
+        android:text="나머지 순위"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:textColor="#000" />
+
+</LinearLayout>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bottom_nav"
+    android:layout_width="match_parent"
+    android:layout_height="80dp"
+    android:orientation="horizontal"
+    android:gravity="center">
+
+    <!-- 홈 -->
+    <Button
+        android:id="@+id/main_btn"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:drawablePadding="13dp"
+        android:paddingVertical="15dp"
+        android:layout_weight="1"
+        android:text="홈"
+        android:textColor="#000"
+        android:textStyle="bold" />
+
+    <!-- 카테고리 -->
+    <Button
+        android:id="@+id/categories_btn"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:drawablePadding="10dp"
+        android:paddingVertical="15dp"
+        android:layout_weight="1"
+        android:text="카테고리"
+        android:textColor="#000"
+        android:textStyle="bold" />
+
+    <!-- 출석체크 -->
+    <Button
+        android:id="@+id/attendance_check_btn"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:drawablePadding="5dp"
+        android:paddingVertical="15dp"
+        android:layout_weight="1"
+        android:text="출석체크"
+        android:textColor="#000"
+        android:textStyle="bold" />
+
+    <!-- 알림 -->
+    <Button
+        android:id="@+id/alarm_btn"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:background="@android:color/transparent"
+        android:drawablePadding="6dp"
+        android:paddingVertical="15dp"
+        android:layout_weight="1"
+        android:text="알림"
+        android:textColor="#000"
+        android:textStyle="bold" />
+
+</LinearLayout>
