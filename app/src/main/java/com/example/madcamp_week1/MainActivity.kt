@@ -18,6 +18,12 @@ import com.google.firebase.firestore.firestore
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.create
 
 class MainActivity : NavActivity() {
 
@@ -25,13 +31,15 @@ class MainActivity : NavActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var mainAdapter: VideoAdapter
 
+    // 서버 IP 주소
+    private val serverIp = "10.249.86.18"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // 알림 권한 요청
         askNotificationPermission()
 
         setupBottomNav(
@@ -41,38 +49,14 @@ class MainActivity : NavActivity() {
             binding.includeBottomNav.alarmBtn
         )
 
-        val allData = loadVideoData()
-        mainAdapter = VideoAdapter(allData)
+        val initialData = loadVideoData()
+        mainAdapter = VideoAdapter(initialData)
         binding.rvVideoList.apply {
-            adapter = VideoAdapter(allData)
+            adapter = mainAdapter
             layoutManager = LinearLayoutManager(this@MainActivity)
         }
 
-        // Firebase 토큰 가져오기
-        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
-            if (!task.isSuccessful) return@addOnCompleteListener
-            Log.d("FCMTOKEN", "My Token: ${task.result}")
-        }
-
-        // Firestore 실시간 리스너
-        val db = Firebase.firestore
-        db.collection("top10")
-            .addSnapshotListener { snapshots, e ->
-                if (e != null) {
-                    Log.w("FIRESTORE", "Listen failed.", e)
-                    return@addSnapshotListener
-                }
-
-                val videoList = mutableListOf<VideoData>()
-                for (doc in snapshots!!) {
-                    // Firestore에서 데이터를 객체로 변환
-                    val video = doc.toObject(VideoData::class.java)
-                    videoList.add(video)
-                }
-
-                // 4. 이제 mainAdapter를 찾을 수 있습니다
-                mainAdapter.updateData(videoList)
-            }
+        fetchVideoDataFromServer()
 
         /**
          * 테스트용 코드입니다.
@@ -112,6 +96,40 @@ class MainActivity : NavActivity() {
 
         // 3. 알림 실행
         notificationManager.notify(999, builder.build())
+    }
+
+    // FastAPI 서버에서 데이터를 가져오기
+    private fun fetchVideoDataFromServer() {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://$serverIp:8000/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        val apiService = retrofit.create(ApiService::class.java)
+
+        apiService.getVideoData().enqueue(object : Callback<List<VideoData>> {
+            override fun onResponse(
+                call: Call<List<VideoData>?>,
+                response: Response<List<VideoData>?>
+            ) {
+                if (response.isSuccessful) {
+                    val videoList = response.body()
+                    if (videoList != null) {
+                        runOnUiThread {
+                            mainAdapter.updateData(videoList)
+                            Log.d("API_SUCCESS", "데이터 ${videoList.size}개로 화면을 갱신했습니다.")
+                        }
+                        sendLocalTestNotification("업데이트 완료", "새로운 영상을 불러왔습니다.")
+                    }
+                } else {
+                    Log.e("API_ERROR", "서버 응답 에러: ${response.code()}")
+                }
+            }
+
+            override fun onFailure(call: Call<List<VideoData>?>, t: Throwable) {
+                Log.e("NETWORK_ERROR", "서버 연결에 실패했씁니다: ${t.message}")
+            }
+        })
     }
 
 

@@ -5,7 +5,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
-import com.bumptech.glide.Glide // Glide 임포트 추가
+import com.bumptech.glide.Glide
 import com.example.madcamp_week1.databinding.ItemVideoBinding
 import com.example.madcamp_week1.databinding.ItemVideoGridBinding
 import com.example.madcamp_week1.databinding.ItemVideoTopBinding
@@ -62,7 +62,6 @@ class VideoAdapter(
             }
 
             is ListItemViewHolder -> {
-                // top3 이후 시작 인덱스 (기존 로직 유지)
                 val rank = position + 3
                 val itemIndex = position + 2
                 if (itemIndex in items.indices) {
@@ -103,7 +102,9 @@ class VideoAdapter(
 
                 setRankBadge(itemBinding, index + 1)
                 itemBinding.tvTitle.text = item.title
-                itemBinding.tvStats.text = "${item.views} 조회"
+
+                // [수정] Long 타입을 텍스트로 넣기 위해 문자열 템플릿 사용
+                itemBinding.tvStats.text = "${formatCount(item.views)} 조회"
 
                 setImage(itemBinding.ivThumbnail, item.imageFile)
 
@@ -137,14 +138,20 @@ class VideoAdapter(
             binding.tvRank.text = rank.toString()
             binding.tvTitle.text = item.title
             binding.tvAuthor.text = item.author
-            binding.tvStats.text = "조회수 ${item.views} • 좋아요 ${item.likes}"
+            binding.tvStats.text = "조회수 ${formatCount(item.views)} • 좋아요 ${formatCount(item.likes.toLong())}"
             setImage(binding.ivThumbnail, item.imageFile)
         }
     }
 
-    // =========================
-    // Utils
-    // =========================
+    // 만 단위로 표시해주는 유틸리티
+    private fun formatCount(count: Long): String {
+        return if (count >= 10000) {
+            "${count / 10000}만"
+        } else {
+            count.toString()
+        }
+    }
+
     private fun setRankBadge(binding: ItemVideoTopBinding, rank: Int) {
         binding.tvRank.text = rank.toString()
         val badgeColor = when (rank) {
@@ -156,11 +163,10 @@ class VideoAdapter(
         binding.tvRank.background.setTint(Color.parseColor(badgeColor))
     }
 
-    // 실시간 이미지 로딩
     private fun setImage(imageView: ImageView, imageUrl: String) {
         Glide.with(imageView.context)
             .load(imageUrl)
-            .placeholder(R.drawable.notfound404) // 로딩 스피너
+            .placeholder(R.drawable.notfound404)
             .error(R.drawable.notfound404)
             .centerCrop()
             .into(imageView)
