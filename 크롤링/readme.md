@@ -64,5 +64,6 @@ pip install torch torchvision google-cloud-translate imagehash pillow tqdm sciki
 
 - python main.py 실행 후 python refiner.py를 실행하여 정제를 완료합니다.
 
-###수정사항
+### 수정사항
 1. top10_filter.py 파일 json 양식 안드로이드 스튜디오 양식에 맞춰지게 코드 수정
+
