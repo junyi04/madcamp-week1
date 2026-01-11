@@ -77,6 +77,7 @@ python -m pip install fastapi uvicorn
 1. top10_filter.py 파일 json 양식 안드로이드 스튜디오 양식에 맞춰지게 코드 수정(2026-01-10)
 2. crawling.py 파일 수정 서버에서 파일 생성시 윈도우가 잠기는 문제 해결 및 execution_log.txt 파일 생성 및 수정되게 수정(2026-01-11)
 3. api_server.py, run_pipeline.py 파일 생성(2026-01-11)
-4. 
+4. top10_filter.py 파일 crawl_status.json 생성 및 수정되게 수정(2026-01-11)
+
 
 
