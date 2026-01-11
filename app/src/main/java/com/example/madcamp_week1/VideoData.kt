@@ -1,5 +1,7 @@
 package com.example.madcamp_week1
 
+import com.google.gson.annotations.SerializedName
+
 data class VideoData (
     val id: String,
     val title: String,

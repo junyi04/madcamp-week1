@@ -18,7 +18,7 @@ class CategoriesActivity : NavActivity() {
     private lateinit var categoryAdapter: VideoAdapter
 
     // 서버 IP 주소
-    private val serverIp = "10.249.86.18"
+    private val serverIp = "10.249.86.17"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -71,7 +71,7 @@ class CategoriesActivity : NavActivity() {
     // 서버에서 카테고리 데이터 가져오기
     private fun fetchCategoryDataFromServer(categoryName: String) {
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://$serverIp:8000/")
+            .baseUrl("http://$serverIp:8001/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 

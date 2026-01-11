@@ -4,4 +4,7 @@
     <color name="deep_pink">#FF69B4</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="rank_gold">#FFD54F</color>
+    <color name="rank_silver">#B0BEC5</color>
+    <color name="rank_bronze">#CD7F32</color>
 </resources>

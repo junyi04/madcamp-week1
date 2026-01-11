@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/bottom_nav"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
+    android:layout_height="75dp"
     android:orientation="horizontal"
     android:gravity="center">
 
@@ -11,59 +11,59 @@
         android:id="@+id/main_btn"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:background="@android:color/transparent"
-        android:drawablePadding="13dp"
-        android:paddingVertical="15dp"
         android:layout_weight="1"
+        android:background="@android:color/transparent"
         android:gravity="center"
+        android:paddingVertical="8dp"
+        android:drawableTop="@drawable/ic_home"
+        android:drawablePadding="6dp"
         android:text="홈"
-        android:textSize="12dp"
-        android:textColor="#fff"
-        android:textStyle="bold" />
+        android:textSize="10sp"
+        android:textColor="#FFFFFF"/>
 
     <!-- 카테고리 -->
     <Button
         android:id="@+id/categories_btn"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:background="@android:color/transparent"
-        android:drawablePadding="10dp"
-        android:paddingVertical="15dp"
         android:layout_weight="1"
+        android:background="@android:color/transparent"
         android:gravity="center"
+        android:paddingVertical="8dp"
+        android:drawableTop="@drawable/ic_category"
+        android:drawablePadding="6dp"
         android:text="카테고리"
-        android:textSize="12dp"
-        android:textColor="#fff"
-        android:textStyle="bold" />
+        android:textSize="10sp"
+        android:textColor="#FFFFFF" />
 
     <!-- 출석체크 -->
     <Button
         android:id="@+id/attendance_check_btn"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:background="@android:color/transparent"
-        android:drawablePadding="5dp"
-        android:paddingVertical="15dp"
         android:layout_weight="1"
+        android:background="@android:color/transparent"
         android:gravity="center"
+        android:paddingVertical="8dp"
+        android:drawableTop="@drawable/ic_calendar"
+        android:drawablePadding="6dp"
         android:text="출석체크"
-        android:textSize="12dp"
-        android:textColor="#fff"
-        android:textStyle="bold" />
+        android:textSize="10sp"
+        android:textColor="#FFFFFF" />
 
     <!-- 알림 -->
     <Button
         android:id="@+id/alarm_btn"
         android:layout_width="0dp"
         android:layout_height="match_parent"
-        android:background="@android:color/transparent"
-        android:drawablePadding="6dp"
-        android:paddingVertical="15dp"
         android:layout_weight="1"
+        android:background="@android:color/transparent"
         android:gravity="center"
+        android:paddingVertical="8dp"
+        android:drawableTop="@drawable/ic_alarm"
+        android:drawablePadding="6dp"
         android:text="알림"
-        android:textSize="12dp"
-        android:textColor="#fff"
-        android:textStyle="bold" />
+        android:textSize="10sp"
+        android:textColor="#FFFFFF" />
 
 </LinearLayout>

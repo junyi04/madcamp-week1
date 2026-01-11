@@ -17,9 +17,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.madcamp_week1.databinding.ActivityMainBinding
-import com.google.firebase.Firebase
-import com.google.firebase.firestore.firestore
-import com.google.firebase.messaging.FirebaseMessaging
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import retrofit2.Call
@@ -66,7 +63,7 @@ class MainActivity : NavActivity() {
     private lateinit var mainAdapter: VideoAdapter
 
     // 서버 IP 주소
-    private val serverIp = "10.249.86.18"
+    private val serverIp = "10.249.86.17"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -125,7 +122,7 @@ class MainActivity : NavActivity() {
     // FastAPI 서버에서 데이터를 가져오기
     private fun fetchVideoDataFromServer() {
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://$serverIp:8000/")
+            .baseUrl("http://$serverIp:8001/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
