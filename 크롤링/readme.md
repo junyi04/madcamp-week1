@@ -6,7 +6,8 @@ AI 기반 숏폼 콘텐츠 큐레이션 시스템 > 본 프로젝트는 틱톡�
 - 대상: 5개 핵심 카테고리 (Main, Dance, Challenge, Food, TTS)
 - 필터: 10만(100,000) 이상의 조회수를 기록한 영상만 1차 수집
 - 보안: Chrome 사용자 세션 유지 및 마우스 휠 시뮬레이션을 통해 봇 탐지 우회
-- 매일 00시에 크롤링되며 crawl_status.json에 금일 크롤링 여부가 적히며 failed 일시 12시에 크롤링을 진행한다(2026-01-11에 수정)
+- 매일 00시에 크롤링되며
+crawl_status.json에 금일 크롤링 여부가 적히며 failed 일시 12시에 크롤링을 진행한다(2026-01-11에 수정)
 ### Step 2: 3-Pass AI Feature Extraction (PyTorch)
 단순한 이미지 비교가 아닌, 딥러닝 모델 ResNet50을 특징 추출기로 사용하여 이미지의 '지문'을 생성합니다.
 - TTA(Test Time Augmentation): 한 장의 이미지를 세 가지 시점(Center Crop, Full View, Zoom View)으로 분석하여 정확도를 극대화합니다
@@ -75,6 +76,7 @@ playwright install chromium
 3. api_server.py, run_pipeline.py 파일 생성(2026-01-11)
 4. top10_filter.py 파일 crawl_status.json 생성 및 수정되게 수정(2026-01-11)
 5. api_server.py 서버가 켜질 때 오늘 크롤링 성공 여부를 확인해 자동으로 작업되게 수정(2026-01-11)
+
 
 
 
