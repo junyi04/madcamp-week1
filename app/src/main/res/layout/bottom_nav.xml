@@ -15,8 +15,10 @@
         android:drawablePadding="13dp"
         android:paddingVertical="15dp"
         android:layout_weight="1"
+        android:gravity="center"
         android:text="홈"
-        android:textColor="#000"
+        android:textSize="12dp"
+        android:textColor="#fff"
         android:textStyle="bold" />
 
     <!-- 카테고리 -->
@@ -28,8 +30,10 @@
         android:drawablePadding="10dp"
         android:paddingVertical="15dp"
         android:layout_weight="1"
+        android:gravity="center"
         android:text="카테고리"
-        android:textColor="#000"
+        android:textSize="12dp"
+        android:textColor="#fff"
         android:textStyle="bold" />
 
     <!-- 출석체크 -->
@@ -41,8 +45,10 @@
         android:drawablePadding="5dp"
         android:paddingVertical="15dp"
         android:layout_weight="1"
+        android:gravity="center"
         android:text="출석체크"
-        android:textColor="#000"
+        android:textSize="12dp"
+        android:textColor="#fff"
         android:textStyle="bold" />
 
     <!-- 알림 -->
@@ -54,8 +60,10 @@
         android:drawablePadding="6dp"
         android:paddingVertical="15dp"
         android:layout_weight="1"
+        android:gravity="center"
         android:text="알림"
-        android:textColor="#000"
+        android:textSize="12dp"
+        android:textColor="#fff"
         android:textStyle="bold" />
 
 </LinearLayout>

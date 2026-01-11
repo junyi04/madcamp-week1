@@ -34,46 +34,46 @@
 
         <!-- 제목, 조회수 -->
         <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:padding="12dp">
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="12dp">
 
-        <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="제목"
-            android:textColor="#000"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="제목"
+                android:textColor="#000"
+                android:textSize="16sp"
+                android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tv_author"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="작성자"
-            android:textColor="#333"
-            android:textSize="13sp" />
+            <TextView
+                android:id="@+id/tv_author"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="작성자"
+                android:textColor="#333"
+                android:textSize="13sp" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
-        <TextView
-            android:id="@+id/tv_stats"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="조회수 12.5M • 좋아요 1.2M"
-            android:textColor="#666"
-            android:textSize="12sp" />
+            <TextView
+                android:id="@+id/tv_stats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="조회수 12.5M • 좋아요 1.2M"
+                android:textColor="#666"
+                android:textSize="12sp" />
 
-    </LinearLayout>
+        </LinearLayout>
 
     </LinearLayout>
 

@@ -1,10 +1,14 @@
 package com.example.madcamp_week1
 
 import android.Manifest
+import android.app.AlarmManager
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.icu.util.Calendar
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
@@ -25,6 +29,36 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
 
+// 매일 자정 업데이트 알람
+fun setDailyNotification(context: Context) {
+    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    val intent = Intent(context, NotificationReceiver::class.java)
+    val pendingIntent = PendingIntent.getBroadcast(
+        context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
+    // 시간 설정: 매일 자정
+    val calendar = Calendar.getInstance().apply {
+        timeInMillis = System.currentTimeMillis()
+        set(Calendar.HOUR_OF_DAY, 21)
+        set(Calendar.MINUTE, 18)
+        set(Calendar.SECOND, 0)
+
+        // 자정이 지났다면, 내일 자정으로 설정
+        if (before(Calendar.getInstance())) {
+            add(Calendar.DATE, 1)
+        }
+    }
+
+    // 매일 반복 설정
+    alarmManager.setInexactRepeating(
+        AlarmManager.RTC_WAKEUP,
+        calendar.timeInMillis,
+        AlarmManager.INTERVAL_DAY,
+        pendingIntent
+    )
+}
+
 class MainActivity : NavActivity() {
 
     override val currentNavItem: NavItem = NavItem.MAIN
@@ -36,6 +70,8 @@ class MainActivity : NavActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        setDailyNotification(this)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -58,25 +94,13 @@ class MainActivity : NavActivity() {
 
         fetchVideoDataFromServer()
 
-        /**
-         * 테스트용 코드입니다.
-         */
-        binding.btnTestNotification.setOnClickListener {
-            sendLocalTestNotification(
-                "신규 Top 10 업데이트! 🔥",
-                "지금 바로 틱톡 인기 영상을 확인하세요!"
-            )
-        }
     }
 
-    /**
-     * 테스트용 코드입니다.
-     */
     private fun sendLocalTestNotification(title: String, message: String) {
         val channelId = "TOP10_CHANNEL"
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        // 1. 채널 생성 (Android 8.0 이상 필수)
+        // 채널 생성
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 channelId,
@@ -86,15 +110,15 @@ class MainActivity : NavActivity() {
             notificationManager.createNotificationChannel(channel)
         }
 
-        // 2. 알림 빌드 (이전에 에러 났던 PRIORITY_HIGH 적용)
+        // 알림 빌드
         val builder = NotificationCompat.Builder(this, channelId)
-            .setSmallIcon(R.drawable.ic_notification) // 우리가 만든 벡터 아이콘
+            .setSmallIcon(R.drawable.ic_dialog_info) // 우리가 만든 벡터 아이콘
             .setContentTitle(title)
             .setContentText(message)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true)
 
-        // 3. 알림 실행
+        // 알림 실행
         notificationManager.notify(999, builder.build())
     }
 
@@ -119,7 +143,6 @@ class MainActivity : NavActivity() {
                             mainAdapter.updateData(videoList)
                             Log.d("API_SUCCESS", "데이터 ${videoList.size}개로 화면을 갱신했습니다.")
                         }
-                        sendLocalTestNotification("업데이트 완료", "새로운 영상을 불러왔습니다.")
                     }
                 } else {
                     Log.e("API_ERROR", "서버 응답 에러: ${response.code()}")
@@ -139,7 +162,11 @@ class MainActivity : NavActivity() {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
                 PackageManager.PERMISSION_GRANTED
             ) {
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 101)
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                    101
+                )
             }
         }
     }

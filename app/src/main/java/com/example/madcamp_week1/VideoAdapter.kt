@@ -1,6 +1,8 @@
 package com.example.madcamp_week1
 
+import android.content.Intent
 import android.graphics.Color
+import android.net.Uri
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -103,10 +105,15 @@ class VideoAdapter(
                 setRankBadge(itemBinding, index + 1)
                 itemBinding.tvTitle.text = item.title
 
-                // [수정] Long 타입을 텍스트로 넣기 위해 문자열 템플릿 사용
                 itemBinding.tvStats.text = "${formatCount(item.views)} 조회"
 
                 setImage(itemBinding.ivThumbnail, item.imageFile)
+
+                // 클릭 시 url 이동
+                itemBinding.ivThumbnail.setOnClickListener {
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
+                    it.context.startActivity(intent)
+                }
 
                 binding.layoutTop3Root.addView(itemBinding.root)
             }
@@ -124,6 +131,12 @@ class VideoAdapter(
             binding.tvTitle.text = item.title
             binding.tvAuthor.text = item.author
             setImage(binding.ivThumbnail, item.imageFile)
+
+            // 클릭 시 url 이동
+            binding.ivThumbnail.setOnClickListener {
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
+                it.context.startActivity(intent)
+            }
         }
     }
 
@@ -140,6 +153,13 @@ class VideoAdapter(
             binding.tvAuthor.text = item.author
             binding.tvStats.text = "조회수 ${formatCount(item.views)} • 좋아요 ${formatCount(item.likes.toLong())}"
             setImage(binding.ivThumbnail, item.imageFile)
+
+            // 클릭 시 url 이동
+            binding.root.setOnClickListener {
+                val context = it.context
+                val intent = Intent(Intent.ACTION_VIEW, Uri.parse(item.url))
+                context.startActivity(intent)
+            }
         }
     }
 
@@ -166,8 +186,8 @@ class VideoAdapter(
     private fun setImage(imageView: ImageView, imageUrl: String) {
         Glide.with(imageView.context)
             .load(imageUrl)
-            .placeholder(R.drawable.notfound404)
-            .error(R.drawable.notfound404)
+            .placeholder(R.drawable.loading_spinner)
+            .error(R.drawable.loading_spinner)
             .centerCrop()
             .into(imageView)
     }
