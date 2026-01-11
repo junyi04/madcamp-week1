@@ -78,6 +78,7 @@ python -m pip install fastapi uvicorn
 2. crawling.py 파일 수정 서버에서 파일 생성시 윈도우가 잠기는 문제 해결 및 execution_log.txt 파일 생성 및 수정되게 수정(2026-01-11)
 3. api_server.py, run_pipeline.py 파일 생성(2026-01-11)
 4. top10_filter.py 파일 crawl_status.json 생성 및 수정되게 수정(2026-01-11)
+5. api_server.py 서버가 켜질 때 오늘 크롤링 성공 여부를 확인해 자동으로 작업되게 수정(2026-01-11)
 
 
 
