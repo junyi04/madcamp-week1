@@ -4,8 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:padding="12dp"
-    android:background="#1A1A1A">
+    android:padding="12dp">
 
     <LinearLayout
     android:layout_width="50dp"
@@ -27,8 +26,8 @@
         <!-- 썸네일 -->
         <ImageView
             android:id="@+id/iv_thumbnail"
-            android:layout_width="120dp"
-            android:layout_height="120dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:scaleType="centerCrop"
             android:layout_marginStart="10dp"
             android:src="@color/black" />
@@ -48,8 +47,8 @@
                 android:ellipsize="end"
                 android:maxLines="1"
                 android:text="제목"
-                android:textColor="#000"
-                android:textSize="16sp"
+                android:textColor="#fff"
+                android:textSize="15sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -58,8 +57,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
                 android:text="작성자"
-                android:textColor="#333"
-                android:textSize="13sp" />
+                android:textColor="#999"
+                android:textSize="12sp" />
 
             <View
                 android:layout_width="match_parent"
@@ -71,7 +70,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="조회수 12.5M • 좋아요 1.2M"
-                android:textColor="#666"
+                android:textColor="#999"
                 android:textSize="12sp" />
 
         </LinearLayout>
