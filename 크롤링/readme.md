@@ -59,7 +59,9 @@ python -m venv .venv
 ~~~
 pip install torch torchvision google-cloud-translate imagehash pillow tqdm scikit-learn
 python -m pip install apscheduler
-python -m pip install fastapi uvicorn 
+python -m pip install fastapi uvicorn
+pip install playwright
+playwright install chromium
 ~~~
 3. 실행 순서
 - google_key.json 파일이 루트 폴더에 있는지 확인합니다.
@@ -73,6 +75,7 @@ python -m pip install fastapi uvicorn
 3. api_server.py, run_pipeline.py 파일 생성(2026-01-11)
 4. top10_filter.py 파일 crawl_status.json 생성 및 수정되게 수정(2026-01-11)
 5. api_server.py 서버가 켜질 때 오늘 크롤링 성공 여부를 확인해 자동으로 작업되게 수정(2026-01-11)
+
 
 
 
