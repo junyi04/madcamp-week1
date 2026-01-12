@@ -17,7 +17,7 @@ class CategoriesActivity : NavActivity() {
 
     private lateinit var categoryAdapter: VideoAdapter
 
-    private val serverIp = "10.249.86.26"
+    private val serverIp = "172.20.62.68"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

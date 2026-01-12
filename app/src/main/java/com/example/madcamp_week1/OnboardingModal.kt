@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.madcamp_week1.ui.theme.DungGeunMo
+import com.example.madcamp_week1.ui.theme.Fredoka
 import com.example.madcamp_week1.ui.theme.PressStart
 
 val RetroDark = Color(0xFF1A1A2E)
@@ -138,7 +140,7 @@ fun OnboardingModal(
                         text = currentStep.description,
                         color = Color(0xFFAAAAAA),
                         fontSize = 12.sp,
-                        fontFamily = PressStart,
+                        fontFamily = DungGeunMo,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(bottom = 20.dp)
                     )
@@ -183,7 +185,11 @@ fun OnboardingModal(
                                 colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF333333)),
                                 shape = RoundedCornerShape(4.dp)
                             ) {
-                                Text("이전", color = Color.White)
+                                Text(
+                                    "이전",
+                                    color = Color.White,
+                                    fontFamily = DungGeunMo
+                                )
                             }
                         }
 
@@ -199,13 +205,23 @@ fun OnboardingModal(
                             colors = ButtonDefaults.buttonColors(containerColor = currentStep.borderColor),
                             shape = RoundedCornerShape(4.dp)
                         ) {
-                            Text(if (step == 2) "시작하기" else "다음", color = Color.Black, fontWeight = FontWeight.Bold)
+                            Text(
+                                if (step == 2) "시작하기" else "다음",
+                                color = Color.Black,
+                                fontWeight = FontWeight.Bold,
+                                fontFamily = DungGeunMo
+                            )
                         }
                     }
 
                     // 6. 건너뛰기
                     TextButton(onClick = onComplete, modifier = Modifier.fillMaxWidth()) {
-                        Text("건너뛰기", color = Color(0xFF666666), fontSize = 12.sp)
+                        Text(
+                            "건너뛰기",
+                            color = Color(0xFF666666),
+                            fontSize = 12.sp,
+                            fontFamily = Fredoka
+                        )
                     }
                 }
             }
@@ -218,6 +234,11 @@ fun FeatureItem(icon: androidx.compose.ui.graphics.vector.ImageVector, text: Str
     Row(verticalAlignment = Alignment.CenterVertically) {
         Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(16.dp))
         Spacer(modifier = Modifier.width(8.dp))
-        Text(text = text, color = color, fontSize = 11.sp)
+        Text(
+            text = text,
+            color = color,
+            fontSize = 11.sp,
+            fontFamily = Fredoka
+        )
     }
 }

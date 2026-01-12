@@ -12,3 +12,7 @@ val PressStart = FontFamily(
 val Fredoka = FontFamily(
     Font(R.font.fredoka, FontWeight.Normal)
 )
+
+val DungGeunMo = FontFamily(
+    Font(R.font.dung_geun_mo, FontWeight.Normal)
+)

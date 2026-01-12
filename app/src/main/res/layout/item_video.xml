@@ -35,8 +35,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="center"
+                android:fontFamily="@font/dung_geun_mo"
+                android:text="1"
                 android:textColor="#FFFFFF"
-                android:textSize="32sp"
+                android:textSize="22sp"
                 android:textStyle="bold"
                 android:background="#66000000"/>
         </com.google.android.material.card.MaterialCardView>
@@ -47,6 +49,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="16dp"
             android:text="제목 #1"
+            android:fontFamily="@font/dung_geun_mo"
             android:maxLines="2"
             android:textColor="#FFFFFF"
             android:textSize="15sp"
@@ -62,7 +65,8 @@
             android:background="@drawable/bg_tag"
             android:paddingHorizontal="10dp"
             android:paddingVertical="2dp"
-            android:text="춤"
+            android:text="dance"
+            android:fontFamily="@font/dung_geun_mo"
             android:textColor="#000"
             android:textSize="11sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -74,7 +78,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:drawablePadding="4dp"
-            android:text="조회수"
+            android:text="100k"
+            android:fontFamily="@font/dung_geun_mo"
             android:textColor="#99FFFF"
             android:textSize="11sp"
             android:textStyle="bold"
@@ -98,6 +103,7 @@
                 android:layout_weight="1"
                 android:background="@drawable/bg_purple_button"
                 android:text="보기"
+                android:fontFamily="@font/dung_geun_mo"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold" />
 
