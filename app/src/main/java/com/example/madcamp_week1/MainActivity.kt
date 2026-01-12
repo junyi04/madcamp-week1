@@ -16,6 +16,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.madcamp_week1.alarm.AlarmScheduler
 import com.example.madcamp_week1.databinding.ActivityMainBinding
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -25,36 +26,6 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.create
-
-// 매일 자정 업데이트 알람
-fun setDailyNotification(context: Context) {
-    val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    val intent = Intent(context, NotificationReceiver::class.java)
-    val pendingIntent = PendingIntent.getBroadcast(
-        context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
-
-    // 시간 설정: 매일 자정
-    val calendar = Calendar.getInstance().apply {
-        timeInMillis = System.currentTimeMillis()
-        set(Calendar.HOUR_OF_DAY, 21)
-        set(Calendar.MINUTE, 18)
-        set(Calendar.SECOND, 0)
-
-        // 자정이 지났다면, 내일 자정으로 설정
-        if (before(Calendar.getInstance())) {
-            add(Calendar.DATE, 1)
-        }
-    }
-
-    // 매일 반복 설정
-    alarmManager.setInexactRepeating(
-        AlarmManager.RTC_WAKEUP,
-        calendar.timeInMillis,
-        AlarmManager.INTERVAL_DAY,
-        pendingIntent
-    )
-}
 
 class MainActivity : NavActivity() {
 
@@ -68,7 +39,7 @@ class MainActivity : NavActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        setDailyNotification(this)
+        AlarmScheduler.scheduleMidnightAlarm(this)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
