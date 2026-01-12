@@ -41,11 +41,6 @@ class AttendanceCheckActivity : NavActivity() {
 
         setupCalendar()
         showTodayStatus()
-
-        // 데이터 보기 버튼 클릭 리스너
-        binding.btnViewData.setOnClickListener {
-            showAttendanceDataDialog()
-        }
     }
 
     private fun setupCalendar() {
@@ -61,7 +56,7 @@ class AttendanceCheckActivity : NavActivity() {
 
             if (attendanceData != null) {
                 // 출석 데이터가 있는 경우만 표시
-                binding.statusText.text = "✅ 출석 완료"
+                binding.statusText.text = "출석 완료 😆"
                 binding.statusText.setTextColor(Color.GREEN)
                 binding.statusText.visibility = android.view.View.VISIBLE
 
@@ -89,7 +84,7 @@ class AttendanceCheckActivity : NavActivity() {
         binding.selectedDateText.text = "오늘: $today"
 
         if (attendanceData != null) {
-            binding.statusText.text = "✅ 오늘 출석 완료"
+            binding.statusText.text = "오늘 출석 완료 😆"
             binding.statusText.setTextColor(Color.GREEN)
             binding.statusText.visibility = android.view.View.VISIBLE
 

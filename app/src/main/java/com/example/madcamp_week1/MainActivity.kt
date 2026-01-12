@@ -28,7 +28,7 @@ class MainActivity : NavActivity() {
     private lateinit var mainAdapter: VideoAdapter
 
     // 서버 IP 주소
-    private val serverIp = "10.249.86.17"
+    private val serverIp = "10.249.86.26"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

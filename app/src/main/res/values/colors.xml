@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="hot_pink">#FF1493</color>
-    <color name="deep_pink">#FF69B4</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="rank_gold">#FFD54F</color>
