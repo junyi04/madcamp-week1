@@ -7,6 +7,14 @@ import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Text
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -33,14 +41,36 @@ class MainActivity : NavActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        AlarmScheduler.scheduleMidnightAlarm(this)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        // ===== 자동 출석 체크 (가장 먼저!) =====
+
+        // 자동 출석 체크
         attendanceManager = AttendanceManager(this)
         checkAttendanceAutomatically()
-        // ====================================
+
+        setContent {
+            val (showOnboarding, setShowOnboarding) = remember {
+                mutableStateOf(isFirstLaunch())
+            }
+
+            Box(modifier = Modifier.fillMaxSize()) {
+                AndroidView(
+                    factory = { binding.root },
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                if (showOnboarding) {
+                    OnboardingModal(
+                        isOpen = showOnboarding,
+                        onComplete = {
+                            setOnboardingFinished()   // 다시 안 뜨게 저장
+                            setShowOnboarding(false)
+                        }
+                    )
+                }
+            }
+        }
+
+        AlarmScheduler.scheduleMidnightAlarm(this)
 
         askNotificationPermission()
 
@@ -102,7 +132,7 @@ class MainActivity : NavActivity() {
                     val videoList = response.body()
                     if (videoList != null) {
                         runOnUiThread {
-                            mainAdapter.updateData(videoList)
+                            mainAdapter.updateCategoryData(videoList, "Top 10")
                             Log.d("API_SUCCESS", "데이터 ${videoList.size}개로 화면을 갱신했습니다.")
                         }
                     }
@@ -152,4 +182,16 @@ class MainActivity : NavActivity() {
             emptyList()
         }
     }
+
+    // 온보딩 상태 저장용 함수
+    private fun isFirstLaunch(): Boolean {
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        return prefs.getBoolean("first_launch", true)
+    }
+
+    private fun setOnboardingFinished() {
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        prefs.edit().putBoolean("first_launch", false).apply()
+    }
+
 }
