@@ -99,20 +99,22 @@ class MainActivity : NavActivity() {
         Log.d("MainActivity", "출석 체크 시작")
         val filePath = attendanceManager.getFilePath()
         Log.d("MainActivity", "JSON 파일 위치: $filePath")
+
         val success = attendanceManager.checkTodayAttendance()
 
         if (success) {
+            // 처음 출석했을 때만 알림
             Toast.makeText(this, "✅ 오늘 출석 완료!", Toast.LENGTH_LONG).show()
             Log.d("MainActivity", "출석 성공!")
         } else {
-            Log.d("MainActivity", "이미 출석한 상태")
-            // 이미 출석했어도 확인 메시지
-            Toast.makeText(this, "오늘은 이미 출석했습니다", Toast.LENGTH_SHORT).show()
+            // 이미 출석했을 때는 로그만 남김
+            Log.d("MainActivity", "이미 출석한 상태 - 토스트 표시 안 함")
             val total = attendanceManager.getTotalAttendanceDays()
             Log.d("MainActivity", "총 출석일: $total")
             Log.d("MainActivity", "========================================")
         }
     }
+
 
     // FastAPI 서버에서 데이터를 가져오기
     private fun fetchVideoDataFromServer() {

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.example.madcamp_week1.ui.theme.PressStart
 
 val RetroDark = Color(0xFF1A1A2E)
 val RetroPink = Color(0xFFFF10F0)
@@ -107,14 +108,19 @@ fun OnboardingModal(
                         }
                     }
 
-                    // 2. 아이콘 (Bounce 효과 대신 간단한 애니메이션)
-                    Text(text = currentStep.icon, fontSize = 48.sp, modifier = Modifier.padding(bottom = 16.dp))
+                    // 2. 아이콘
+                    Text(
+                        text = currentStep.icon,
+                        fontSize = 48.sp,
+                        modifier = Modifier.padding(bottom = 16.dp)
+                    )
 
                     // 3. 제목 & 부제목
                     Text(
                         text = currentStep.title,
                         color = RetroCyan,
                         fontSize = 18.sp,
+                        fontFamily = PressStart,
                         fontWeight = FontWeight.Bold,
                         modifier = Modifier.padding(bottom = 4.dp)
                     )
@@ -123,6 +129,7 @@ fun OnboardingModal(
                         style = TextStyle(
                             brush = Brush.horizontalGradient(currentStep.colors),
                             fontSize = 14.sp,
+                            fontFamily = PressStart,
                             fontWeight = FontWeight.Bold
                         ),
                         modifier = Modifier.padding(bottom = 12.dp)
@@ -131,11 +138,12 @@ fun OnboardingModal(
                         text = currentStep.description,
                         color = Color(0xFFAAAAAA),
                         fontSize = 12.sp,
+                        fontFamily = PressStart,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(bottom = 20.dp)
                     )
 
-                    // 4. 특징 항목 (Step별 상세 설명)
+                    // 4. 특징 항목
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
