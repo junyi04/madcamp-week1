@@ -6,6 +6,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -23,6 +24,7 @@ class MainActivity : NavActivity() {
 
     override val currentNavItem: NavItem = NavItem.MAIN
     private lateinit var binding: ActivityMainBinding
+    private lateinit var attendanceManager: AttendanceManager
     private lateinit var mainAdapter: VideoAdapter
 
     // 서버 IP 주소
@@ -35,6 +37,10 @@ class MainActivity : NavActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        // ===== 자동 출석 체크 (가장 먼저!) =====
+        attendanceManager = AttendanceManager(this)
+        checkAttendanceAutomatically()
+        // ====================================
 
         askNotificationPermission()
 
@@ -54,6 +60,28 @@ class MainActivity : NavActivity() {
 
         fetchVideoDataFromServer()
 
+    }
+    /**
+     * 자동 출석 체크
+     */
+    private fun checkAttendanceAutomatically() {
+
+        Log.d("MainActivity", "출석 체크 시작")
+        val filePath = attendanceManager.getFilePath()
+        Log.d("MainActivity", "JSON 파일 위치: $filePath")
+        val success = attendanceManager.checkTodayAttendance()
+
+        if (success) {
+            Toast.makeText(this, "✅ 오늘 출석 완료!", Toast.LENGTH_LONG).show()
+            Log.d("MainActivity", "출석 성공!")
+        } else {
+            Log.d("MainActivity", "이미 출석한 상태")
+            // 이미 출석했어도 확인 메시지
+            Toast.makeText(this, "오늘은 이미 출석했습니다", Toast.LENGTH_SHORT).show()
+            val total = attendanceManager.getTotalAttendanceDays()
+            Log.d("MainActivity", "총 출석일: $total")
+            Log.d("MainActivity", "========================================")
+        }
     }
 
     // FastAPI 서버에서 데이터를 가져오기
