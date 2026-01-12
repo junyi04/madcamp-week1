@@ -52,7 +52,7 @@ class VideoAdapter(
         when (holder) {
             is CategoryContainerViewHolder -> {
                 // 상단 타이틀 텍스트를 현재 카테고리로 변경
-                holder.binding.tvCategoryTitle.text = "$currentCategoryName"
+                holder.binding.tvCategoryTitle.text = "🔥 $currentCategoryName 🔥"
             }
             is ListItemViewHolder -> {
                 val dataIndex = position - 1

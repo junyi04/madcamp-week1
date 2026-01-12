@@ -4,8 +4,22 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_horizontal"
-    android:paddingTop="20dp"
+    android:paddingTop="30dp"
     android:background="#000">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="영포티!\n난 아직 젊다!"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp"
+        android:fontFamily="@font/dung_geun_mo"
+        android:gravity="center"
+        android:layout_marginBottom="12dp"
+        android:shadowColor="#FFFFFF"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:shadowRadius="12"/>
 
     <com.google.android.material.card.MaterialCardView
         xmlns:app="http://schemas.android.com/apk/res-auto"
@@ -15,6 +29,7 @@
         app:cardCornerRadius="20dp"
         app:strokeColor="#99FFFF"
         app:strokeWidth="3dp"
+        android:layout_marginTop="10dp"
         android:layout_marginBottom="20dp">
 
         <TextView
