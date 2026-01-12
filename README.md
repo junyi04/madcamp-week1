@@ -1,22 +1,124 @@
-# 🚩 프로젝트 진행 현황 공유
+## 🚢 배포 방법
 
-## 🛠 현재 작업 및 수정 내용
-* **VideoAdapter 디자인 통합 완료**: 메인 화면의 상단 Top 3 카드 디자인과 하단 리스트 디자인을 `ItemVideoTopBinding`으로 통일
-* **Rank Badge 구현**: 1~3위는 금/은/동 색상을 적용하고, 4위부터는 기본 테마색이 적용되도록 커스텀
-* **카테고리 필터링 기능**: 탭 레이아웃 선택 시 JSON의 `category` 필드값을 기준으로 격자(Grid) 화면에 실시간 반영
+### 1. APK 빌드
 
-## ⚠️ 참고 및 수정 필요 사항
+```
+Build → Generate Signed Bundle / APK
+→ APK 선택
+→ 키 생성 또는 선택
+→ Release 빌드
+```
 
-### 1. 더미 데이터(JSON) 관련
-* 현재 `assets/video_data.json`의 **더미 데이터**를 사용하여 UI 테스트를 진행 중
-* 각 데이터 아이템에 `category` 변수를 추가하여 필터링 로직을 연결
+### 2. 주의사항
 
-### 2. 기본 이미지 및 리소스 수정 필요
-* **이미지 로딩 실패 처리**: 현재 데이터를 불러오지 못할 때의 디폴트 사진이 `notfound404`로 설정되어 있음.
-* **수정 필요 사항**:
-    * `res/drawable`에 실제 사용할 기본 이미지(예: `default_thumbnail.png`)를 추가해야 함.
-    * `VideoAdapter.kt` 소스 코드 내 `setImage` 함수의 `R.drawable.notfound404` 부분을 추가한 리소스 파일명으로 교체해야 함.
+- `sync_json.bat` 같은 개발 도구는 APK에 포함 안 됨
+- 각 사용자의 출석 데이터는 각자 기기에 저장됨
+- 서버 필요 없음 (로컬 저장소만 사용)
 
-### 3. Git 작업 상태
-* 깃허브 원격 저장소의 최신 변경 사항과 현재 작업 코드를 **병합(Merge)** 완료하여 푸시
-* 작업 시작 전 반드시 `git pull` 먼저 진행하세요.
+---
+
+## 📊 동작 흐름
+
+```
+사용자
+  ↓
+앱 실행 (MainActivity)
+  ↓
+AttendanceManager.checkTodayAttendance()
+  ↓
+JSON 파일 확인
+  ↓
+오늘 출석 여부 확인
+  ↓
+├─ 이미 출석: Toast "이미 출석했습니다"
+└─ 미출석: 출석 기록 저장 → Toast "✅ 출석 완료!"
+  ↓
+출석체크 페이지 (AttendanceCheckActivity)
+  ↓
+달력에서 날짜 선택
+  ↓
+JSON에서 해당 날짜 데이터 조회
+  ↓
+├─ 데이터 있음: "✅ 출석 완료" + 시간 표시
+└─ 데이터 없음: 아무것도 표시 안 함
+```
+
+---
+
+## 📚 참고 사항
+
+### 파일 위치 정리
+
+| 위치 | 용도 | 자동 업데이트? |
+|------|------|---------------|
+| **에뮬레이터 내부** | 앱 실행 중 실제 사용 | ✅ 자동 |
+| **PC 프로젝트 assets** | 초기 템플릿, Git 관리 | ❌ 수동 (sync_json.bat) |
+
+### 핵심 개념
+
+- **assets 폴더**: 읽기 전용 초기 리소스
+- **내부 저장소**: 앱 실행 중 읽기/쓰기 가능
+- **동기화**: 필요 시 수동으로 PC로 복사
+
+---
+
+## 🔗 유용한 명령어 모음
+
+### **캐시 완전 삭제**
+```powershell
+Get-Process java -ErrorAction SilentlyContinue | Stop-Process -Force; Remove-Item -Recurse -Force $env:USERPROFILE\.gradle\caches\8.11.1\transforms -ErrorAction SilentlyContinue; Remove-Item -Recurse -Force C:\Users\logan\AndroidStudioProjects\MadCamp-week1\.gradle -ErrorAction SilentlyContinue
+```
+
+### **앱 완전 재설치**
+```powershell
+.\adb uninstall com.example.madcamp_week1
+```
+
+### **에뮬레이터 파일 확인**
+```powershell
+.\adb shell cat /data/user/0/com.example.madcamp_week1/files/storage/attendance.json
+```
+
+### **JSON 파일 PC로 가져오기**
+```powershell
+.\adb pull /data/user/0/com.example.madcamp_week1/files/storage/attendance.json .
+```
+
+---
+
+## ✅ 최종 점검
+
+### 앱 실행 전
+
+```
+□ Android Studio 최신 버전
+□ JDK 17 또는 21 설정
+□ Gradle 8.11.1
+□ 에뮬레이터 날짜 확인
+□ assets/storage/attendance.json 존재 (빈 배열 [])
+```
+
+### 빌드 성공 확인
+
+```
+□ Gradle Sync 성공
+□ Build 성공 (Ctrl+F9)
+□ Run 버튼 활성화
+□ 앱 실행 시 출석 Toast 표시
+□ 출석체크 페이지에서 오늘 날짜 "출석 완료" 표시
+```
+
+---
+
+## 📞 문제 발생 시
+
+1. **Gradle 에러**: Invalidate Caches & Restart
+2. **캐시 손상**: PC 재부팅 후 transforms 삭제
+3. **날짜 문제**: 에뮬레이터 설정에서 날짜 확인
+4. **파일 동기화**: sync_json.bat 실행
+
+---
+
+**작성일:** 2026-01-11  
+**프로젝트:** MadCamp Week 1  
+**개발자:** 김건희
