@@ -1,80 +1,78 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="10dp"
-    android:layout_marginVertical="5dp"
-    app:cardCornerRadius="10dp"
-    app:cardElevation="5dp">
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:padding="12dp">
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="120dp"
-        android:orientation="horizontal">
+    android:layout_width="50dp"
+    android:layout_height="wrap_content"
+    android:gravity="center">
 
         <!-- 순위 -->
         <TextView
             android:id="@+id/tv_rank"
-            android:layout_width="32dp"
-            android:layout_height="match_parent"
-            android:gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:text="4"
+            android:textColor="#FFFFFF"
             android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="#666" />
+            android:textStyle="bold" />
+
+    </LinearLayout>
 
         <!-- 썸네일 -->
         <ImageView
             android:id="@+id/iv_thumbnail"
-            android:layout_width="120dp"
-            android:layout_height="match_parent"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
             android:scaleType="centerCrop"
+            android:layout_marginStart="10dp"
             android:src="@color/black" />
 
         <!-- 제목, 조회수 -->
         <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:padding="12dp">
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:padding="12dp">
 
-        <TextView
-            android:id="@+id/tv_title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:text="제목"
-            android:textColor="#000"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            <TextView
+                android:id="@+id/tv_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:text="제목"
+                android:textColor="#fff"
+                android:textSize="15sp"
+                android:textStyle="bold" />
 
-        <TextView
-            android:id="@+id/tv_author"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="작성자"
-            android:textColor="#333"
-            android:textSize="13sp" />
+            <TextView
+                android:id="@+id/tv_author"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:text="작성자"
+                android:textColor="#999"
+                android:textSize="12sp" />
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
 
-        <TextView
-            android:id="@+id/tv_stats"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="조회수 12.5M • 좋아요 1.2M"
-            android:textColor="#666"
-            android:textSize="12sp" />
+            <TextView
+                android:id="@+id/tv_stats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="조회수 12.5M • 좋아요 1.2M"
+                android:textColor="#999"
+                android:textSize="12sp" />
+
+        </LinearLayout>
 
     </LinearLayout>
-
-    </LinearLayout>
-
-</androidx.cardview.widget.CardView>
