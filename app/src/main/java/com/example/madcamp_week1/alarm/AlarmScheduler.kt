@@ -17,8 +17,8 @@ object AlarmScheduler {
 
         val calendar = Calendar.getInstance().apply {
             timeInMillis = System.currentTimeMillis()
-            set(Calendar.HOUR_OF_DAY, 0)
-            set(Calendar.MINUTE, 0)
+            set(Calendar.HOUR_OF_DAY, 11)
+            set(Calendar.MINUTE, 31)
             set(Calendar.SECOND, 0)
 
             if (timeInMillis <= System.currentTimeMillis()) {

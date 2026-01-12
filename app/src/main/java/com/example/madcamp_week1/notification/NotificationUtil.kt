@@ -23,8 +23,8 @@ object NotificationUtil {
 
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("DailyCue")
-            .setContentText("새로운 하루가 시작되었음")
+            .setContentTitle("밈포티")
+            .setContentText("Top 10 업데이트 알림 🔥")
             .setAutoCancel(true)
             .build()
 
