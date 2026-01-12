@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "997183598588",
+    "project_id": "madcamp-week1-aecc0",
+    "storage_bucket": "madcamp-week1-aecc0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:997183598588:android:f32b0ff24bc4d401e7cc79",
+        "android_client_info": {
+          "package_name": "com.example.madcamp_week1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-9VUVwdDaS3ZmC4GGD6A5OMC95faghBE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,27 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/cardContainer"
     android:layout_width="match_parent"
-    android:layout_height="280dp"
-    android:layout_margin="6dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="4dp">
+    android:layout_height="270dp"
+    android:layout_margin="10dp"
+    app:cardCornerRadius="15dp"
+    app:cardElevation="6dp"
+    app:strokeWidth="1.5dp"
+    app:strokeColor="#22000000">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent">
 
+        <!-- 썸네일이 카드 전체를 덮음 -->
         <ImageView
             android:id="@+id/iv_thumbnail"
             android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:scaleType="centerCrop"
-            android:src="@color/black" />
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop"/>
 
-        <LinearLayout
+        <!-- 하단 그라데이션 -->
+        <View
             android:layout_width="match_parent"
             android:layout_height="match_parent"
+            android:background="@drawable/bottom_shadow_gradient"/>
+
+        <!-- 좌상단 랭크 배지 -->
+        <TextView
+            android:id="@+id/tv_rank"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_margin="8dp"
+            android:gravity="center"
+            android:text="1"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:background="@drawable/rank_badge_circle"
+            android:textSize="14sp"/>
+
+        <!-- 하단 텍스트 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             android:orientation="vertical"
             android:padding="10dp">
 
@@ -29,25 +52,23 @@
                 android:id="@+id/tv_title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ellipsize="end"
-                android:maxLines="2"
                 android:text="제목"
-                android:textColor="#000"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
+                android:textColor="#FFFFFF"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:maxLines="2"/>
 
             <TextView
                 android:id="@+id/tv_author"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="작성자"
-                android:textColor="#666"
-                android:textSize="12sp" />
+                android:layout_marginTop="5dp"
+                android:textColor="#DDFFFFFF"
+                android:textSize="11sp"/>
+
         </LinearLayout>
-    </LinearLayout>
-</androidx.cardview.widget.CardView>
+
+    </FrameLayout>
+
+</com.google.android.material.card.MaterialCardView>

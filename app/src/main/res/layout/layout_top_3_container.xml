@@ -2,27 +2,41 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:clipChildren="false"
+    android:clipToPadding="false">
 
-    <!-- Top3 가로 영역 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginVertical="30dp"
+        android:text="🔥 밈 Top 10"
+        android:textSize="25sp"
+        android:textColor="#fff"
+        android:textStyle="bold" />
+
     <LinearLayout
         android:id="@+id/layout_top_3_root"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="bottom"
         android:orientation="horizontal"
-        android:padding="5dp"
-        android:layout_marginVertical="5dp" />
+        android:paddingTop="20dp"
+        android:paddingBottom="30dp"
+        android:paddingHorizontal="10dp"
+        android:clipChildren="false"
+        android:clipToPadding="false" />
 
-    <TextView
-        android:id="@+id/tv_remaining_rank_title"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="10dp"
-        android:layout_marginHorizontal="10dp"
-        android:layout_marginBottom="10dp"
-        android:text="나머지 순위"
-        android:textSize="20sp"
-        android:textStyle="bold"
-        android:textColor="#000" />
-
+<!--    <TextView-->
+<!--        android:id="@+id/tv_remaining_rank_title"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginStart="16dp"-->
+<!--        android:layout_marginTop="10dp"-->
+<!--        android:layout_marginBottom="10dp"-->
+<!--        android:text="그 외 순위"-->
+<!--        android:textSize="18sp"-->
+<!--        android:textStyle="bold"-->
+<!--        android:textColor="#FFFFFF" />-->
 </LinearLayout>

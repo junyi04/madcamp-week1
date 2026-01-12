@@ -1,18 +1,24 @@
 package com.example.madcamp_week1
 
 import android.os.Bundle
+import android.util.Log
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.madcamp_week1.databinding.ActivityCategoriesBinding
 import com.google.android.material.tabs.TabLayout
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class CategoriesActivity : NavActivity() {
     override val currentNavItem: NavItem = NavItem.CATEGORIES
     lateinit var binding: ActivityCategoriesBinding
 
-    private lateinit var allVideoData: List<VideoData>
     private lateinit var categoryAdapter: VideoAdapter
+
+    // 서버 IP 주소
+    private val serverIp = "10.249.86.17"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -26,7 +32,6 @@ class CategoriesActivity : NavActivity() {
             binding.includeBottomNav.alarmBtn
         )
 
-        allVideoData = loadVideoData()
         setupRecyclerView()
         setupTabs()
     }
@@ -38,41 +43,55 @@ class CategoriesActivity : NavActivity() {
             layoutManager = GridLayoutManager(this@CategoriesActivity, 2)
         }
 
-        // 디폴트 카테고리
-        filterAndDisplay("춤")
+        fetchCategoryDataFromServer("dance")
     }
 
     private fun setupTabs() {
-        val categories = listOf("춤", "챌린지", "음식", "TTS")
-        categories.forEach { name ->
-            binding.tabLayout.addTab(binding.tabLayout.newTab().setText(name))
+        val categories = listOf("춤" to "dance", "챌린지" to "challenge", "음식" to "food", "TTS" to "tts")
+        categories.forEach { (displayName, _) ->
+            binding.tabLayout.addTab(binding.tabLayout.newTab().setText(displayName))
         }
 
         binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                val selectedCategory = tab?.text.toString()
-                filterAndDisplay(selectedCategory)
+                val selectedName = when (tab?.text.toString()) {
+                    "춤" -> "dance"
+                    "챌린지" -> "challenge"
+                    "음식" -> "food"
+                    "TTS" -> "tts"
+                    else -> "dance"
+                }
+                fetchCategoryDataFromServer(selectedName)
             }
             override fun onTabUnselected(tab: TabLayout.Tab?) {}
             override fun onTabReselected(tab: TabLayout.Tab?) {}
         })
     }
 
-    // JSON의 category 변수를 사용한 필터링 로직
-    private fun filterAndDisplay(categoryName: String) {
-        val filteredList = allVideoData.filter { data ->
-            data.category == categoryName
-        }
-        categoryAdapter.updateData(filteredList)
-    }
+    // 서버에서 카테고리 데이터 가져오기
+    private fun fetchCategoryDataFromServer(categoryName: String) {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("http://$serverIp:8001/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
 
-    private fun loadVideoData(): List<VideoData> {
-        return try {
-            val jsonString = assets.open("video_data.json").bufferedReader().use { it.readText() }
-            val listType = object : TypeToken<List<VideoData>>() {}.type
-            Gson().fromJson(jsonString, listType)
-        } catch (e: Exception) {
-            emptyList()
-        }
+        val apiService = retrofit.create(ApiService::class.java)
+
+        apiService.getCategoryData(categoryName).enqueue(object : Callback<List<VideoData>> {
+            override fun onResponse(call: Call<List<VideoData>>, response: Response<List<VideoData>>) {
+                if (response.isSuccessful) {
+                    val videoList = response.body() ?: emptyList()
+                    // UI 갱신
+                    runOnUiThread {
+                        categoryAdapter.updateData(videoList)
+                        Log.d("CATEGORY_SUCCESS", "$categoryName 데이터 ${videoList.size}개 로드 완료")
+                    }
+                }
+            }
+
+            override fun onFailure(call: Call<List<VideoData>>, t: Throwable) {
+                Log.e("CATEGORY_ERROR", "$categoryName 로드 실패: ${t.message}")
+            }
+        })
     }
 }
