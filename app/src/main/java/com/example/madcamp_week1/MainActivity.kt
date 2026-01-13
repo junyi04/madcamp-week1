@@ -6,12 +6,19 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.widget.Toast
+import androidx.activity.compose.setContent
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.madcamp_week1.alarm.AlarmScheduler
 import com.example.madcamp_week1.databinding.ActivityMainBinding
+import com.example.madcamp_week1.ui.attendence.AttendanceModal
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import retrofit2.Call
@@ -27,30 +34,77 @@ class MainActivity : NavActivity() {
     private lateinit var attendanceManager: AttendanceManager
     private lateinit var mainAdapter: VideoAdapter
 
-    // 서버 IP 주소
-    private val serverIp = "10.249.86.26"
+    // 알림 권한 후 출석을 띄울지 여부
+    private var pendingAttendanceAfterPermission = false
+
+    // Compose 상태를 Activity에서 건드리기 위한 콜백
+    private var showAttendanceFromActivity: (() -> Unit)? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        AlarmScheduler.scheduleMidnightAlarm(this)
-
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        // ===== 자동 출석 체크 (가장 먼저!) =====
         attendanceManager = AttendanceManager(this)
-        checkAttendanceAutomatically()
-        // ====================================
 
-        askNotificationPermission()
+        setContent {
+            val (showOnboarding, setShowOnboarding) = remember {
+                val first = isFirstLaunch()
+                mutableStateOf(first)
+            }
 
+            val (showAttendanceModal, setShowAttendanceModal) = remember {
+                mutableStateOf(false)
+            }
+
+            // Activity → Compose 연결
+            showAttendanceFromActivity = {
+                setShowAttendanceModal(true)
+            }
+
+            Box(modifier = Modifier.fillMaxSize()) {
+
+                // XML 기반 메인 UI
+                AndroidView(
+                    factory = { binding.root },
+                    modifier = Modifier.fillMaxSize()
+                )
+
+                // 출석 모달
+                if (showAttendanceModal) {
+                    AttendanceModal(
+                        totalDays = attendanceManager.getTotalAttendanceDays(),
+                        onClose = { setShowAttendanceModal(false) }
+                    )
+                }
+
+                // 온보딩
+                if (showOnboarding) {
+                    OnboardingModal(
+                        isOpen = showOnboarding,
+                        onComplete = {
+                            setOnboardingFinished()
+                            setShowOnboarding(false)
+
+                            // 알림 권한 후 출석 모달을 띄울 예정
+                            pendingAttendanceAfterPermission = true
+
+                            askNotificationPermission()
+                            AlarmScheduler.scheduleMidnightAlarm(this@MainActivity)
+                        }
+                    )
+                }
+            }
+        }
+
+        // 하단 네비게이션
         setupBottomNav(
             binding.includeBottomNav.mainBtn,
             binding.includeBottomNav.categoriesBtn,
             binding.includeBottomNav.attendanceCheckBtn,
-            binding.includeBottomNav.alarmBtn
+            binding.includeBottomNav.comicBtn
         )
 
+        // RecyclerView
         val initialData = loadVideoData()
         mainAdapter = VideoAdapter(initialData)
         binding.rvVideoList.apply {
@@ -58,36 +112,36 @@ class MainActivity : NavActivity() {
             layoutManager = LinearLayoutManager(this@MainActivity)
         }
 
+        // 서버에서 데이터 가져오기
         fetchVideoDataFromServer()
-
     }
-    /**
-     * 자동 출석 체크
-     */
-    private fun checkAttendanceAutomatically() {
 
-        Log.d("MainActivity", "출석 체크 시작")
-        val filePath = attendanceManager.getFilePath()
-        Log.d("MainActivity", "JSON 파일 위치: $filePath")
-        val success = attendanceManager.checkTodayAttendance()
+    // 알림 권한 응답 → 출석 체크
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (success) {
-            Toast.makeText(this, "✅ 오늘 출석 완료!", Toast.LENGTH_LONG).show()
-            Log.d("MainActivity", "출석 성공!")
-        } else {
-            Log.d("MainActivity", "이미 출석한 상태")
-            // 이미 출석했어도 확인 메시지
-            Toast.makeText(this, "오늘은 이미 출석했습니다", Toast.LENGTH_SHORT).show()
-            val total = attendanceManager.getTotalAttendanceDays()
-            Log.d("MainActivity", "총 출석일: $total")
-            Log.d("MainActivity", "========================================")
+        if (requestCode == 101 && pendingAttendanceAfterPermission) {
+            pendingAttendanceAfterPermission = false
+
+            val success = attendanceManager.checkTodayAttendance()
+            if (success) {
+                runOnUiThread {
+                    showAttendanceFromActivity?.invoke()
+                }
+            }
         }
     }
 
-    // FastAPI 서버에서 데이터를 가져오기
+    // 서버 통신
     private fun fetchVideoDataFromServer() {
+        val ngrokUrl = "https://young-forty.ngrok.app/"
+
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://$serverIp:8001/")
+            .baseUrl(ngrokUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -102,8 +156,7 @@ class MainActivity : NavActivity() {
                     val videoList = response.body()
                     if (videoList != null) {
                         runOnUiThread {
-                            mainAdapter.updateData(videoList)
-                            Log.d("API_SUCCESS", "데이터 ${videoList.size}개로 화면을 갱신했습니다.")
+                            mainAdapter.updateCategoryData(videoList, "Top 10")
                         }
                     }
                 } else {
@@ -112,16 +165,16 @@ class MainActivity : NavActivity() {
             }
 
             override fun onFailure(call: Call<List<VideoData>?>, t: Throwable) {
-                Log.e("NETWORK_ERROR", "서버 연결에 실패했씁니다: ${t.message}")
+                Log.e("NETWORK_ERROR", "서버 연결 실패: ${t.message}")
             }
         })
     }
 
-    // 사용자에게 알림 수신 권한을 요청하는 팝업
+    // 알림 권한
     private fun askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
-                PackageManager.PERMISSION_GRANTED
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
             ) {
                 ActivityCompat.requestPermissions(
                     this,
@@ -132,24 +185,31 @@ class MainActivity : NavActivity() {
         }
     }
 
-    // 파일 이름을 String 형식으로 읽어오는 유틸리티 함수
+    // JSON 로드
     private fun getJsonFromAssets(context: Context, fileName: String): String? {
         return try {
             context.assets.open(fileName).bufferedReader().use { it.readText() }
         } catch (e: Exception) {
-            e.printStackTrace()
             null
         }
     }
 
-    // video_data.json 읽어서 객체 리스트로 변환
     private fun loadVideoData(): List<VideoData> {
         val jsonString = getJsonFromAssets(this, "video_data.json")
         return if (jsonString != null) {
             val listType = object : TypeToken<List<VideoData>>() {}.type
             Gson().fromJson(jsonString, listType)
-        } else {
-            emptyList()
-        }
+        } else emptyList()
+    }
+
+    // 온보딩 상태
+    private fun isFirstLaunch(): Boolean {
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        return prefs.getBoolean("first_launch", true)
+    }
+
+    private fun setOnboardingFinished() {
+        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
+        prefs.edit().putBoolean("first_launch", false).apply()
     }
 }

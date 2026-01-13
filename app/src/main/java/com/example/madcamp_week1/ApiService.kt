@@ -10,7 +10,7 @@ interface ApiService {
     fun getVideoData(): Call<List<VideoData>>
 
     // 카테고리 화면
-    @GET("category/{name}")
+    @GET("api/category/{name}")
     fun getCategoryData(
         @Path("name") categoryName: String
     ): Call<List<VideoData>>

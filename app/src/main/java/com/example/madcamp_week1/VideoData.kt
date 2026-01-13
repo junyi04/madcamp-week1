@@ -10,5 +10,6 @@ data class VideoData (
     val likes: Int,
     val url: String,
     val imageFile: String,
-    val category: String? = null
+    val category: String? = null,
+    var isLiked: Boolean = false
 )

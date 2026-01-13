@@ -5,6 +5,7 @@
     android:id="@+id/categories"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="#000000"
     android:fitsSystemWindows="true"
     tools:context=".CategoriesActivity">
 
@@ -12,6 +13,13 @@
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="#000000"
+        app:tabTextColor="#88FFFFFF"
+        app:tabSelectedTextColor="#99FFFF"
+        app:tabIndicatorColor="#99FFFF"
+        app:tabIndicatorHeight="3dp"
+        app:tabMode="fixed"
+        app:tabGravity="fill"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
@@ -20,8 +28,10 @@
         android:id="@+id/rv_category_list"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:padding="8dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp"
         android:clipToPadding="false"
+        android:background="#000000"
         app:layout_constraintTop_toBottomOf="@id/tab_layout"
         app:layout_constraintBottom_toTopOf="@id/include_bottom_nav"
         app:layout_constraintStart_toStartOf="parent"
