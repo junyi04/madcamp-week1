@@ -123,29 +123,6 @@
 
 ---
 
-## 🎨 디자인 시스템
-
-### Color Palette
-
-앱은 레트로 사이버펑크 스타일의 색상 팔레트를 사용합니다:
-
-```kotlin
-val RetroDark = Color(0xFF1A1A2E)      // 배경색
-val RetroPink = Color(0xFFFF10F0)      // 강조색 1
-val RetroPurple = Color(0xFFB300FF)    // 강조색 2
-val RetroCyan = Color(0xFF00FFFF)      // 주요 액센트
-val RetroYellow = Color(0xFFFFFF00)    // 보조 액센트
-val RetroOrange = Color(0xFFFF6600)    // 알림색
-```
-
-### Typography
-
-- **PressStart**: 레트로 게임 스타일 (제목용)
-- **DungGeunMo**: 한글 픽셀 폰트 (본문용)
-- **Fredoka**: 부드러운 산세리프 (보조용)
-
----
-
 ## 🔧 설치 및 실행
 
 ### 사전 요구사항
@@ -215,7 +192,7 @@ GET /top10
 
 #### 2. 카테고리별 영상 조회
 ```http
-GET /category/{name}
+GET /api/category/{name}
 ```
 
 **Parameters:**
