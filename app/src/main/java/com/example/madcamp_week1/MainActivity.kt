@@ -34,8 +34,6 @@ class MainActivity : NavActivity() {
     private lateinit var attendanceManager: AttendanceManager
     private lateinit var mainAdapter: VideoAdapter
 
-    private val serverIp = "172.20.62.68"
-
     // 알림 권한 후 출석을 띄울지 여부
     private var pendingAttendanceAfterPermission = false
 
@@ -44,6 +42,11 @@ class MainActivity : NavActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        /**
+         * 테스트용
+         */
+        getSharedPreferences("app_prefs", MODE_PRIVATE).edit().clear().apply()
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         attendanceManager = AttendanceManager(this)
@@ -71,7 +74,7 @@ class MainActivity : NavActivity() {
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // 🎁 출석 모달
+                // 출석 모달
                 if (showAttendanceModal) {
                     AttendanceModal(
                         totalDays = attendanceManager.getTotalAttendanceDays(),
@@ -79,7 +82,7 @@ class MainActivity : NavActivity() {
                     )
                 }
 
-                // 🚀 온보딩
+                // 온보딩
                 if (showOnboarding) {
                     OnboardingModal(
                         isOpen = showOnboarding,
@@ -118,7 +121,7 @@ class MainActivity : NavActivity() {
         fetchVideoDataFromServer()
     }
 
-    // 🔔 알림 권한 응답 → 출석 체크
+    // 알림 권한 응답 → 출석 체크
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -138,12 +141,12 @@ class MainActivity : NavActivity() {
         }
     }
 
-    // ============================
     // 서버 통신
-    // ============================
     private fun fetchVideoDataFromServer() {
+        val ngrokUrl = "https://electroacoustically-nonciliated-kati.ngrok-free.dev"
+
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://$serverIp:8001/")
+            .baseUrl(ngrokUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
@@ -172,9 +175,7 @@ class MainActivity : NavActivity() {
         })
     }
 
-    // ============================
     // 알림 권한
-    // ============================
     private fun askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
@@ -189,9 +190,7 @@ class MainActivity : NavActivity() {
         }
     }
 
-    // ============================
     // JSON 로드
-    // ============================
     private fun getJsonFromAssets(context: Context, fileName: String): String? {
         return try {
             context.assets.open(fileName).bufferedReader().use { it.readText() }
@@ -208,9 +207,7 @@ class MainActivity : NavActivity() {
         } else emptyList()
     }
 
-    // ============================
     // 온보딩 상태
-    // ============================
     private fun isFirstLaunch(): Boolean {
         val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         return prefs.getBoolean("first_launch", true)

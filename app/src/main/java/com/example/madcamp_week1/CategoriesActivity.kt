@@ -17,8 +17,6 @@ class CategoriesActivity : NavActivity() {
 
     private lateinit var categoryAdapter: VideoAdapter
 
-    private val serverIp = "172.20.62.68"
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityCategoriesBinding.inflate(layoutInflater)
@@ -84,8 +82,10 @@ class CategoriesActivity : NavActivity() {
     }
 
     private fun fetchCategoryDataFromServer(categoryName: String, uiTitle: String) {
+        val ngrokUrl = "https://electroacoustically-nonciliated-kati.ngrok-free.dev"
+
         val retrofit = Retrofit.Builder()
-            .baseUrl("http://$serverIp:8001/")
+            .baseUrl(ngrokUrl)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
