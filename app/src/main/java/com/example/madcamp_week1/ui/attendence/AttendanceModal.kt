@@ -20,12 +20,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import java.util.Calendar
 
 @Composable
 fun AttendanceModal(
     totalDays: Int,
     onClose: () -> Unit
 ) {
+    // 오늘의 요일 가져오기
+    val calendar = Calendar.getInstance()
+    val dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK)
+
+    // 월요일 = 인덱스 0
+    val currentDayIndex = (dayOfWeek + 5) % 7
+
     Dialog(onDismissRequest = {}) {
         Box(
             modifier = Modifier
@@ -39,13 +47,17 @@ fun AttendanceModal(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                    listOf("월","화","수","목","금","토","일").forEachIndexed { index, day ->
+                    val days = listOf("월","화","수","목","금","토","일")
+                    days.forEachIndexed { index, day ->
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(day, color = Color.White)
                             Spacer(modifier = Modifier.height(6.dp))
+
+                            val isToday = index == currentDayIndex
+
                             Text(
-                                if (index < totalDays % 7) "✔" else "○",
-                                color = if (index < totalDays % 7) Color.Green else Color.Gray,
+                                if (isToday) "✔" else "○",
+                                color = if (isToday) Color.Green else Color.Gray,
                                 fontSize = 18.sp
                             )
                         }

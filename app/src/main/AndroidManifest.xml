@@ -10,8 +10,9 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
     <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
 
+    <!-- 첫 줄 온보딩 문제로 백업 false 지정 -->
     <application
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_young_forty"
@@ -34,7 +35,7 @@
         <activity
             android:name=".AttendanceCheckActivity"
             android:exported="false"/>
-        <activity android:name=".AlarmActivity" />
+        <activity android:name=".ComicActivity" />
 
         <receiver
             android:name=".alarm.MidnightReceiver"

@@ -38,16 +38,20 @@
                 android:fontFamily="@font/dung_geun_mo"
                 android:text="1"
                 android:textColor="#FFFFFF"
-                android:textSize="22sp"
+                android:textSize="25sp"
                 android:textStyle="bold"
-                android:background="#66000000"/>
+                android:background="#66000000"
+                android:shadowColor="#FFFFFF"
+                android:shadowDx="0"
+                android:shadowDy="0"
+                android:shadowRadius="12"/>
         </com.google.android.material.card.MaterialCardView>
 
         <TextView
             android:id="@+id/tv_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
+            android:layout_marginHorizontal="16dp"
             android:text="제목 #1"
             android:maxLines="2"
             android:textColor="#FFFFFF"
@@ -102,13 +106,14 @@
                 android:layout_weight="1"
                 android:background="@drawable/bg_purple_button"
                 android:text="보기"
+                android:textSize="12dp"
                 android:fontFamily="@font/dung_geun_mo"
                 android:textColor="#FFFFFF"
                 android:textStyle="bold" />
 
             <ImageButton
                 android:id="@+id/btn_like"
-                android:layout_width="50dp"
+                android:layout_width="40dp"
                 android:layout_height="match_parent"
                 android:layout_marginStart="8dp"
                 android:background="@drawable/bg_mint_button"

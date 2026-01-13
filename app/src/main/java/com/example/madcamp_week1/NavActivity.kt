@@ -1,11 +1,10 @@
 package com.example.madcamp_week1
 
 import android.content.Intent
-import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 
-enum class NavItem { MAIN, CATEGORIES, ATTENDANCECHECK, ALARM }
+enum class NavItem { MAIN, CATEGORIES, ATTENDANCECHECK, COMIC }
 
 abstract class NavActivity : AppCompatActivity() {
 
@@ -15,7 +14,7 @@ abstract class NavActivity : AppCompatActivity() {
         mainBtn: View,
         categoriesBtn: View,
         attendanceCheckBtn: View,
-        alarmBtn: View
+        comicBtn: View
     ) {
         mainBtn.setOnClickListener {
             if (currentNavItem != NavItem.MAIN) {
@@ -38,9 +37,9 @@ abstract class NavActivity : AppCompatActivity() {
             }
         }
 
-        alarmBtn.setOnClickListener {
-            if (currentNavItem != NavItem.ALARM) {
-                startActivity(Intent(this, AlarmActivity::class.java))
+        comicBtn.setOnClickListener {
+            if (currentNavItem != NavItem.COMIC) {
+                startActivity(Intent(this, ComicActivity::class.java))
                 finish()
             }
         }

@@ -82,12 +82,34 @@ class VideoAdapter(
 
             setImage(binding.ivThumbnail, item.imageFile)
 
+            updateLikeIcon(item.isLiked)
+
             binding.btnView.setOnClickListener {
                 it.context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(item.url)))
             }
 
             binding.btnLike.setOnClickListener {
-                Toast.makeText(it.context, "저장되었습니다.", Toast.LENGTH_SHORT).show()
+                item.isLiked = !item.isLiked
+                if (item.isLiked) {
+                    Toast.makeText(it.context, "저장되었습니다.", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(it.context, "취소되었습니다.", Toast.LENGTH_SHORT).show()
+                }
+
+                // 아이콘 업데이트
+                updateLikeIcon(item.isLiked)
+            }
+        }
+
+        private fun updateLikeIcon(isLiked: Boolean) {
+            if (isLiked) {
+                // 채워진 하트
+                binding.btnLike.setImageResource(R.drawable.ic_heart_filled)
+                binding.btnLike.setColorFilter(android.graphics.Color.RED)
+            } else {
+                // 빈 하트
+                binding.btnLike.setImageResource(R.drawable.ic_heart_outline)
+                binding.btnLike.clearColorFilter()
             }
         }
     }

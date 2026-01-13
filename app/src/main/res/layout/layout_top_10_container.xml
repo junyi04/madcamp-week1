@@ -41,7 +41,11 @@
             android:textColor="#FFFFFF"
             android:textSize="22sp"
             android:textStyle="bold"
-            android:fontFamily="@font/dung_geun_mo"/>
+            android:fontFamily="@font/dung_geun_mo"
+            android:shadowColor="#FFFFFF"
+            android:shadowDx="0"
+            android:shadowDy="0"
+            android:shadowRadius="12"/>
     </com.google.android.material.card.MaterialCardView>
 
     <LinearLayout

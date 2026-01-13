@@ -26,7 +26,7 @@ class CategoriesActivity : NavActivity() {
             binding.includeBottomNav.mainBtn,
             binding.includeBottomNav.categoriesBtn,
             binding.includeBottomNav.attendanceCheckBtn,
-            binding.includeBottomNav.alarmBtn
+            binding.includeBottomNav.comicBtn
         )
 
         setupRecyclerView()
@@ -48,7 +48,7 @@ class CategoriesActivity : NavActivity() {
         // 기존 탭 로직 유지
         val categories = listOf("춤" to "dance", "챌린지" to "challenge", "음식" to "food", "TTS" to "tts")
 
-        // 중복 방지를 위해 탭 초기화 (안전장치)
+        // 중복 방지를 위해 탭 초기화
         binding.tabLayout.removeAllTabs()
 
         categories.forEach { (displayName, _) ->
@@ -82,7 +82,7 @@ class CategoriesActivity : NavActivity() {
     }
 
     private fun fetchCategoryDataFromServer(categoryName: String, uiTitle: String) {
-        val ngrokUrl = "https://electroacoustically-nonciliated-kati.ngrok-free.dev"
+        val ngrokUrl = "https://young-forty.ngrok.app/"
 
         val retrofit = Retrofit.Builder()
             .baseUrl(ngrokUrl)

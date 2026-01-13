@@ -43,18 +43,13 @@ class MainActivity : NavActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        /**
-         * 테스트용
-         */
-        getSharedPreferences("app_prefs", MODE_PRIVATE).edit().clear().apply()
-
         binding = ActivityMainBinding.inflate(layoutInflater)
         attendanceManager = AttendanceManager(this)
 
         setContent {
-
             val (showOnboarding, setShowOnboarding) = remember {
-                mutableStateOf(isFirstLaunch())
+                val first = isFirstLaunch()
+                mutableStateOf(first)
             }
 
             val (showAttendanceModal, setShowAttendanceModal) = remember {
@@ -106,7 +101,7 @@ class MainActivity : NavActivity() {
             binding.includeBottomNav.mainBtn,
             binding.includeBottomNav.categoriesBtn,
             binding.includeBottomNav.attendanceCheckBtn,
-            binding.includeBottomNav.alarmBtn
+            binding.includeBottomNav.comicBtn
         )
 
         // RecyclerView
@@ -143,7 +138,7 @@ class MainActivity : NavActivity() {
 
     // 서버 통신
     private fun fetchVideoDataFromServer() {
-        val ngrokUrl = "https://electroacoustically-nonciliated-kati.ngrok-free.dev"
+        val ngrokUrl = "https://young-forty.ngrok.app/"
 
         val retrofit = Retrofit.Builder()
             .baseUrl(ngrokUrl)
