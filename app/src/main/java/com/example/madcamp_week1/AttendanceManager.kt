@@ -194,4 +194,17 @@ class AttendanceManager(private val context: Context) {
         attendanceFile.writeText("[]")
         Log.d(TAG, "출석 기록 초기화")
     }
+
+    fun isAttendedToday(): Boolean {
+        val today = getTodayDate()
+        return isAttended(today)
+    }
+
+    fun markToday() {
+        val today = getTodayDate()
+        val attendances = getAllAttendances().toMutableList()
+        attendances.add(AttendanceData(today, System.currentTimeMillis(), true))
+        saveAttendances(attendances)
+    }
+
 }

@@ -20,11 +20,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.madcamp_week1.AttendanceData
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 @Composable
 fun AttendanceModal(
     totalDays: Int,
+    attendances: List<AttendanceData>,
     onClose: () -> Unit
 ) {
     // 오늘의 요일 가져오기
@@ -46,18 +50,38 @@ fun AttendanceModal(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                    val days = listOf("월","화","수","목","금","토","일")
+                val days = listOf("월", "화", "수", "목", "금", "토", "일")
+
+                // 요일별 출석 여부 계산
+                val checkedDays = BooleanArray(7)
+
+                attendances.forEach { att ->
+                    val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.KOREA)
+                    val date = sdf.parse(att.date) ?: return@forEach
+
+                    val cal = Calendar.getInstance()
+                    cal.time = date
+
+                    val day = cal.get(Calendar.DAY_OF_WEEK)
+                    val index = (day + 5) % 7   // 월=0
+
+                    checkedDays[index] = true
+                }
+
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     days.forEachIndexed { index, day ->
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(day, color = Color.White)
                             Spacer(modifier = Modifier.height(6.dp))
 
-                            val isToday = index == currentDayIndex
+                            val isChecked = checkedDays[index]
 
                             Text(
-                                if (isToday) "✔" else "○",
-                                color = if (isToday) Color.Green else Color.Gray,
+                                if (isChecked) "✔" else "○",
+                                color = if (isChecked) Color.Green else Color.Gray,
                                 fontSize = 18.sp
                             )
                         }

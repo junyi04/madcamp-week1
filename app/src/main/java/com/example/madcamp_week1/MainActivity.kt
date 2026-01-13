@@ -9,8 +9,7 @@ import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
@@ -34,11 +33,11 @@ class MainActivity : NavActivity() {
     private lateinit var attendanceManager: AttendanceManager
     private lateinit var mainAdapter: VideoAdapter
 
-    // 알림 권한 후 출석을 띄울지 여부
-    private var pendingAttendanceAfterPermission = false
-
-    // Compose 상태를 Activity에서 건드리기 위한 콜백
+    // Activity → Compose bridge
     private var showAttendanceFromActivity: (() -> Unit)? = null
+
+    // 오늘 출석이 필요한지
+    private var needAttendanceToday = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,56 +46,60 @@ class MainActivity : NavActivity() {
         attendanceManager = AttendanceManager(this)
 
         setContent {
+
             val (showOnboarding, setShowOnboarding) = remember {
-                val first = isFirstLaunch()
-                mutableStateOf(first)
+                mutableStateOf(isFirstLaunch())
             }
 
             val (showAttendanceModal, setShowAttendanceModal) = remember {
                 mutableStateOf(false)
             }
 
-            // Activity → Compose 연결
             showAttendanceFromActivity = {
                 setShowAttendanceModal(true)
             }
 
+            // 앱 시작 시 오늘 출석 필요 여부 계산
+            LaunchedEffect(Unit) {
+                if (!isFirstLaunch()) {
+                    needAttendanceToday = !attendanceManager.isAttendedToday()
+                    if (needAttendanceToday && hasNotificationPermission()) {
+                        attendanceManager.markToday()
+                        showAttendanceFromActivity?.invoke()
+                        AlarmScheduler.scheduleMidnightAlarm(this@MainActivity)
+                    }
+                }
+            }
+
             Box(modifier = Modifier.fillMaxSize()) {
 
-                // XML 기반 메인 UI
                 AndroidView(
                     factory = { binding.root },
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // 출석 모달
                 if (showAttendanceModal) {
                     AttendanceModal(
                         totalDays = attendanceManager.getTotalAttendanceDays(),
+                        attendances = attendanceManager.getAllAttendances(),
                         onClose = { setShowAttendanceModal(false) }
                     )
                 }
 
-                // 온보딩
                 if (showOnboarding) {
                     OnboardingModal(
                         isOpen = showOnboarding,
                         onComplete = {
                             setOnboardingFinished()
                             setShowOnboarding(false)
-
-                            // 알림 권한 후 출석 모달을 띄울 예정
-                            pendingAttendanceAfterPermission = true
-
+                            needAttendanceToday = true
                             askNotificationPermission()
-                            AlarmScheduler.scheduleMidnightAlarm(this@MainActivity)
                         }
                     )
                 }
             }
         }
 
-        // 하단 네비게이션
         setupBottomNav(
             binding.includeBottomNav.mainBtn,
             binding.includeBottomNav.categoriesBtn,
@@ -104,7 +107,6 @@ class MainActivity : NavActivity() {
             binding.includeBottomNav.comicBtn
         )
 
-        // RecyclerView
         val initialData = loadVideoData()
         mainAdapter = VideoAdapter(initialData)
         binding.rvVideoList.apply {
@@ -112,11 +114,10 @@ class MainActivity : NavActivity() {
             layoutManager = LinearLayoutManager(this@MainActivity)
         }
 
-        // 서버에서 데이터 가져오기
         fetchVideoDataFromServer()
     }
 
-    // 알림 권한 응답 → 출석 체크
+    // 권한 결과 → 출석 처리
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
@@ -124,92 +125,90 @@ class MainActivity : NavActivity() {
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
 
-        if (requestCode == 101 && pendingAttendanceAfterPermission) {
-            pendingAttendanceAfterPermission = false
-
-            val success = attendanceManager.checkTodayAttendance()
-            if (success) {
-                runOnUiThread {
-                    showAttendanceFromActivity?.invoke()
-                }
+        if (requestCode == 101) {
+            if (needAttendanceToday) {
+                attendanceManager.markToday()
+                showAttendanceFromActivity?.invoke()
             }
+            AlarmScheduler.scheduleMidnightAlarm(this)
         }
     }
 
-    // 서버 통신
-    private fun fetchVideoDataFromServer() {
-        val ngrokUrl = "https://young-forty.ngrok.app/"
-
-        val retrofit = Retrofit.Builder()
-            .baseUrl(ngrokUrl)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
-
-        val apiService = retrofit.create(ApiService::class.java)
-
-        apiService.getVideoData().enqueue(object : Callback<List<VideoData>> {
-            override fun onResponse(
-                call: Call<List<VideoData>?>,
-                response: Response<List<VideoData>?>
-            ) {
-                if (response.isSuccessful) {
-                    val videoList = response.body()
-                    if (videoList != null) {
-                        runOnUiThread {
-                            mainAdapter.updateCategoryData(videoList, "Top 10")
-                        }
-                    }
-                } else {
-                    Log.e("API_ERROR", "서버 응답 에러: ${response.code()}")
-                }
-            }
-
-            override fun onFailure(call: Call<List<VideoData>?>, t: Throwable) {
-                Log.e("NETWORK_ERROR", "서버 연결 실패: ${t.message}")
-            }
-        })
-    }
-
-    // 알림 권한
+    // 알림 권한 요청
     private fun askNotificationPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
-                != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (!hasNotificationPermission()) {
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.POST_NOTIFICATIONS),
                     101
                 )
+            } else {
+                if (needAttendanceToday) {
+                    attendanceManager.markToday()
+                    showAttendanceFromActivity?.invoke()
+                }
+                AlarmScheduler.scheduleMidnightAlarm(this)
             }
+        } else {
+            if (needAttendanceToday) {
+                attendanceManager.markToday()
+                showAttendanceFromActivity?.invoke()
+            }
+            AlarmScheduler.scheduleMidnightAlarm(this)
         }
     }
 
-    // JSON 로드
+    private fun hasNotificationPermission(): Boolean {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        } else true
+    }
+
+    // ---------------------- 서버 & 기타 ----------------------
+
+    private fun fetchVideoDataFromServer() {
+        val retrofit = Retrofit.Builder()
+            .baseUrl("https://young-forty.ngrok.app/")
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
+        retrofit.create(ApiService::class.java).getVideoData()
+            .enqueue(object : Callback<List<VideoData>> {
+                override fun onResponse(call: Call<List<VideoData>>, response: Response<List<VideoData>>) {
+                    if (response.isSuccessful) {
+                        response.body()?.let {
+                            runOnUiThread { mainAdapter.updateCategoryData(it, "Top 10") }
+                        }
+                    }
+                }
+                override fun onFailure(call: Call<List<VideoData>>, t: Throwable) {
+                    Log.e("NETWORK", t.message ?: "")
+                }
+            })
+    }
+
     private fun getJsonFromAssets(context: Context, fileName: String): String? {
-        return try {
-            context.assets.open(fileName).bufferedReader().use { it.readText() }
-        } catch (e: Exception) {
-            null
-        }
+        return try { context.assets.open(fileName).bufferedReader().use { it.readText() } }
+        catch (e: Exception) { null }
     }
 
     private fun loadVideoData(): List<VideoData> {
-        val jsonString = getJsonFromAssets(this, "video_data.json")
-        return if (jsonString != null) {
-            val listType = object : TypeToken<List<VideoData>>() {}.type
-            Gson().fromJson(jsonString, listType)
-        } else emptyList()
+        val json = getJsonFromAssets(this, "video_data.json")
+        return if (json != null) Gson().fromJson(json, object : TypeToken<List<VideoData>>() {}.type)
+        else emptyList()
     }
 
-    // 온보딩 상태
     private fun isFirstLaunch(): Boolean {
         val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
         return prefs.getBoolean("first_launch", true)
     }
 
     private fun setOnboardingFinished() {
-        val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
-        prefs.edit().putBoolean("first_launch", false).apply()
+        getSharedPreferences("app_prefs", MODE_PRIVATE)
+            .edit().putBoolean("first_launch", false).apply()
     }
 }
