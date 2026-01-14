@@ -83,7 +83,7 @@
 
 ## 🛠️ 기술 스택
 ### Client
-#
+---
 ### Android
 
 - **Language**: Kotlin 2.0.21
@@ -112,9 +112,9 @@
 - **Compose BOM 2024.02.00**
 - **Material3**: Compose용 Material Design 3
 - **Material Icons Extended**: 확장 아이콘 세트
-#
+---
 #### Backend
-#
+---
 #### Server
 - **Language**: Python 3.8+
 - **Architecture**: REST API Architecture
@@ -144,6 +144,9 @@
 - Android Studio Hedgehog (2023.1.1) 이상
 - JDK 17 이상
 - Android SDK API 34
+- Python 3.8 이상
+- MySQL 8.0 이상
+- Chrome Browser (Playwright용)
 
 ### 설치 방법
 
@@ -153,11 +156,11 @@ git clone https://github.com/yourusername/madcamp_week1.git
 cd madcamp_week1
 ```
 
-2. **Firebase 설정**
-    - Firebase Console에서 프로젝트 생성
-    - `google-services.json` 파일을 `app/` 디렉토리에 추가
-    - FCM 설정 완료
-
+2. **서버 연동 설정 (FastAPI & Ngrok)**
+    - 필수: 백엔드(main.py) 실행 후 생성된 ngrok URL이 필요
+    - ngrok에서 토큰을 받아와 ngrok.yml 넣고 저장
+    - 서버 실행시
+    > ngrok http 8001
 3. **서버 URL 설정**
 
    `MainActivity.kt`, `CategoriesActivity.kt`에서 ngrok URL 설정:
@@ -179,6 +182,7 @@ cd madcamp_week1
 ### Base URL
 ```
 https://your-server.ngrok-free.dev/
+# (주의: ngrok 실행 시마다 변경되는 도메인을 사용해야 합니다)
 ```
 
 ### Endpoints
@@ -192,13 +196,13 @@ GET /top10
 ```json
 [
   {
-    "id": "video_001",
+    "id": "dance05",
     "title": "제목",
     "author": "작성자",
     "views": 1234567,
     "likes": 50000,
     "url": "https://tiktok.com/@user/video/123",
-    "imageFile": "https://cdn.tiktok.com/thumb.jpg",
+    "imageFile": "imageFile": "https://your-server.ngrok-free.dev/2026-01-14/main/top10/thumbnails/dance05.jpg",
     "category": "dance"
   }
 ]
@@ -216,14 +220,14 @@ GET /api/category/{name}
 ```json
 [
   {
-    "id": "video_002",
+    "id": "dance05",
     "title": "챌린지 제목",
     "author": "작성자",
     "views": 987654,
     "likes": 30000,
     "url": "https://tiktok.com/@user/video/456",
-    "imageFile": "https://cdn.tiktok.com/thumb2.jpg",
-    "category": "challenge"
+    "imageFile": "https://your-server.ngrok-free.dev/2026-01-14/dance/top10/thumbnails/dance05.jpg",
+    "category": "dance"
   }
 ]
 ```
@@ -318,6 +322,90 @@ private fun fetchCategoryDataFromServer(categoryName: String, uiTitle: String) {
 }
 ```
 
+### 5. 서버 이미지 렌더링 (Glide)
+
+FastAPI 서버(Ngrok)에서 서빙하는 로컬 이미지를 효율적으로 로딩 및 캐싱:
+
+~~~
+Glide.with(context)
+    .load(videoData.imageFile) // 서버의 ngrok URL (예: https://.../dance01.jpg)
+    .diskCacheStrategy(DiskCacheStrategy.ALL) // 리소스 절약을 위한 캐싱
+    .placeholder(R.drawable.placeholder)
+    .into(binding.thumbnailImageView)
+~~~
+
+### 6. 틱톡 딥링크 연동 (Intent)
+
+'보기' 버튼 클릭 시 틱톡 앱으로 바로 이동하거나 웹으로 연결:
+
+~~~
+val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoData.url))
+try {
+    // 틱톡 앱이 설치되어 있으면 앱으로 실행
+    startActivity(intent)
+} catch (e: ActivityNotFoundException) {
+    // 없으면 브라우저로 틱톡 웹페이지 실행
+    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(videoData.url)))
+}
+~~~
+
+### 7. [Backend] AI 중복 제거 파이프라인
+
+ResNet50과 FaceNet을 활용하여 수집된 밈의 이미지 유사도를 분석, 중복 콘텐츠(유사도 0.82 이상)를 자동 필터링:
+
+~~~
+# cnn_pic_dec.py (Core Logic)
+def check_duplicate(new_img_path, existing_imgs):
+    vec1 = get_feature_vector(new_img_path) # ResNet50 특징 추출
+    
+    for img in existing_imgs:
+        vec2 = get_feature_vector(img)
+        similarity = cosine_similarity(vec1, vec2)
+        
+        if similarity > 0.82: # 임계값 초과 시 중복 판정
+            return True, img
+            
+    return False, None
+~~~
+
+### 8. [Backend] 지능형 크롤링 (Playwright)
+
+봇 탐지를 우회하고 네트워크 패킷을 직접 가로채어(Interception) 고품질 데이터 수집:
+
+~~~
+# crawling.py
+async def intercept_response(route, request):
+    if "/api/recommend/item_list" in request.url:
+        data = await route.fetch()
+        json_data = await data.json()
+        
+        # 조회수 10만 이상 & 한국어 영상만 필터링하여 저장
+        process_video_data(json_data) 
+        
+    await route.continue_()
+~~~
+
+### 9. [Backend] 데이터 수명 주기 관리 (MySQL)
+
+FastAPI 서버와 MySQL을 연동하여 데이터를 영구 저장하고, 최신 트렌드 유지를 위해 3일이 지난 데이터(파일 및 DB 로그)를 자동으로 소각하는 로직 구현:
+
+~~~
+# top10_filter.py (Data Retention Policy)
+def cleanup_old_data(conn):
+    cursor = conn.cursor()
+    # 3일 전 날짜 계산
+    limit_date = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%d')
+    
+    # 1. DB 메타데이터 삭제
+    sql = "DELETE FROM tiktok_videos WHERE DATE(created_at) < %s"
+    cursor.execute(sql, (limit_date,))
+    
+    # 2. 로컬 이미지 파일 삭제 (스토리지 최적화)
+    if os.path.exists(old_folder_path):
+        shutil.rmtree(old_folder_path)
+        
+    conn.commit()
+~~~
 ---
 
 ## 👥 개발팀
