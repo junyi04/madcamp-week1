@@ -113,13 +113,13 @@
 - **Material3**: Compose용 Material Design 3
 - **Material Icons Extended**: 확장 아이콘 세트
 ---
-#### Backend
+### Backend
 ---
-#### Server
+### Server
 - **Language**: Python 3.8+
 - **Architecture**: REST API Architecture
 
-#### Framework & Server
+### Framework & Server
 - **FastAPI**: 고성능 비동기 REST API 서버 구축
 - **Uvicorn**: ASGI 웹 서버 (FastAPI 구동)
 - **APScheduler**: 매일 자정 크롤링 파이프라인 자동화
