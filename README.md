@@ -38,7 +38,7 @@
 
 ### 1. 홈 화면 (Top 10)
 
-![Home Screen](images/home_screen.png)
+![Home Screen](images/home_screen.jpg)
 
 - **매일 자정 업데이트**: 틱톡에서 가장 인기 있는 밈 Top 10을 매일 자동 업데이트
 - **영상 정보 표시**:
@@ -52,7 +52,7 @@
 
 ### 2. 카테고리 화면
 
-![Categories Screen](images/category_dance.png)
+![Categories Screen](images/category_dance.jpg)
 
 4가지 주요 카테고리로 구성:
 - **춤**: 유행하는 댄스 챌린지
@@ -64,7 +64,7 @@
 
 ### 3. 출석체크 화면
 
-![Attendance Screen](images/attendace_check.png)
+![Attendance Screen](images/attendace_check.jpg)
 
 - **달력 UI**: 월간 출석 현황 한눈에 확인
 - **출석 통계**:
