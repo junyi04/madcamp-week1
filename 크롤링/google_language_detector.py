@@ -19,39 +19,45 @@ MYSQL_CONFIG = {
 SERVER_DOMAIN = "young-forty.ngrok.app"
 
 def save_filtered_to_mysql(filtered_data, category, filtered_date):
-    """한국어 아닌 것을 MySQL에 저장"""
+    """한국어 아닌 콘텐츠를 MySQL에 저장 (날짜별 관리)"""
     try:
         connection = mysql.connector.connect(**MYSQL_CONFIG)
         cursor = connection.cursor()
         
+        # ⭐ 해당 카테고리 오늘 날짜 데이터만 삭제
+        cursor.execute("""DELETE FROM filtered_non_korean 
+                         WHERE category = %s AND filtered_date = %s""", 
+                      (category, filtered_date))
+        print(f"   🗑️ 기존 {category} 필터 데이터 삭제 완료")
+        
         sql = """INSERT INTO filtered_non_korean 
-                 (id, original_id, title, author, views, likes, category, url, 
-                  image_url, detected_language, filtered_date) 
-                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 (id, original_id, title, author, views, likes, category, 
+                  url, image_url, filter_reason, detected_language, filtered_date) 
+                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                  ON DUPLICATE KEY UPDATE 
-                 title=VALUES(title), views=VALUES(views)"""
+                 detected_language=VALUES(detected_language)"""
         
         for item in filtered_data:
             # 이미지 URL 변환
             img_path = item.get('image_file', '')
             if img_path:
-                img_name = Path(img_path).name
-                local_path = f"{filtered_date}/{category}/thumbnails/{img_name}"
+                local_path = img_path.replace('\\', '/').lstrip('/')
                 image_url = f"https://{SERVER_DOMAIN}/{local_path}"
             else:
                 image_url = None
             
             cursor.execute(sql, (
-                f"nonko_{category}_{item.get('id')}",
+                f"nk_{category}_{item.get('id')}",
                 item.get('id'),
-                item.get('title', ''),
-                item.get('author', ''),
+                item.get('title', '제목 없음'),
+                item.get('author', '알 수 없음'),
                 item.get('views', 0),
                 item.get('likes', 0),
                 category,
                 item.get('url', ''),
                 image_url,
-                'unknown',  # 추후 감지된 언어 저장 가능
+                'non_korean',
+                item.get('detected_language', 'unknown'),
                 filtered_date
             ))
         
