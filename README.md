@@ -82,7 +82,9 @@
 ---
 
 ## 🛠️ 기술 스택
-
+#
+### Client
+#
 ### Android
 
 - **Language**: Kotlin 2.0.21
@@ -95,20 +97,12 @@
 - **Material Design 3**: 일관된 디자인 시스템
 - **XML Layouts**: 기존 뷰 시스템 활용
 
-### Architecture & Libraries
-
 #### 네트워킹
-- **Retrofit 2.9.0**: REST API 통신
+- **Retrofit2**: FAST API 서버 통신 
 - **Gson Converter**: JSON 데이터 파싱
 
 #### 이미지 로딩
 - **Glide 4.16.0**: 효율적인 이미지 캐싱 및 로딩
-
-#### Firebase
-- **Firebase BOM 33.7.0**
-    - Firebase Analytics
-    - Firebase Cloud Messaging (FCM)
-    - Firestore (데이터 저장)
 
 #### UI Components
 - **RecyclerView**: 리스트 렌더링
@@ -119,7 +113,29 @@
 - **Compose BOM 2024.02.00**
 - **Material3**: Compose용 Material Design 3
 - **Material Icons Extended**: 확장 아이콘 세트
+#
+#### Backend
+#
+#### Server
+- **Language**: Python 3.8+
+- **Architecture**: REST API Architecture
 
+#### Framework & Server
+- **FastAPI**: 고성능 비동기 REST API 서버 구축
+- **Uvicorn**: ASGI 웹 서버 (FastAPI 구동)
+- **APScheduler**: 매일 자정 크롤링 파이프라인 자동화
+
+#### Database & Infra
+- **MySQL 8.0**: 메타데이터 영구 저장 및 3일 주기 데이터 관리
+- **ngrok**: HTTPS 터널링을 통한 외부 접속 환경 제공
+
+#### AI & Machine Learning
+- **PyTorch & torchvision**: 딥러닝 모델(ResNet50) 구동 및 추론
+- **FaceNet**: 얼굴 특징 추출 및 유사도 분석
+- **Google Cloud Translation API**: 한국어 콘텐츠 이중 검증(NLP)
+
+#### Crawling
+- **Playwright**: 네트워크 패킷 인터셉트 기반 고품질 데이터 수집
 ---
 
 ## 🔧 설치 및 실행
