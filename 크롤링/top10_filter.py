@@ -4,7 +4,7 @@ import os
 import json
 import shutil
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # ===========================
 # 🎛️ 설정 영역
@@ -27,31 +27,89 @@ MYSQL_CONFIG = {
 SERVER_DOMAIN = "young-forty.ngrok.app"
 
 # ===========================
-# 🗄️ MySQL 함수
+# 🗄️ MySQL 날짜 기반 관리 함수
 # ===========================
-def clear_all_db_data():
-    """전체 DB 데이터 초기화"""
-    print("🗑️ DB 전체 초기화 중...")
+def clear_old_data():
+    """3일 이상 된 데이터 자동 삭제 (파일 시스템과 동일)"""
+    print("🗑️ 오래된 DB 데이터 정리 중...")
     try:
         connection = mysql.connector.connect(**MYSQL_CONFIG)
         cursor = connection.cursor()
         
-        # 모든 테이블 초기화
-        cursor.execute("TRUNCATE TABLE tiktok_videos")
-        cursor.execute("TRUNCATE TABLE filtered_non_korean")
-        cursor.execute("TRUNCATE TABLE filtered_duplicates")
-        cursor.execute("TRUNCATE TABLE candidate_videos")
+        # 3일 전 날짜 계산
+        three_days_ago = (datetime.now() - timedelta(days=RETENTION_DAYS)).strftime("%Y-%m-%d")
+        
+        # Foreign Key 체크 비활성화
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
+        
+        # 3일 이상 된 데이터만 삭제
+        cursor.execute("DELETE FROM tiktok_videos WHERE DATE(created_at) < %s", (three_days_ago,))
+        deleted_main = cursor.rowcount
+        
+        cursor.execute("DELETE FROM candidate_videos WHERE DATE(created_at) < %s", (three_days_ago,))
+        deleted_cand = cursor.rowcount
+        
+        cursor.execute("DELETE FROM filtered_non_korean WHERE DATE(created_at) < %s", (three_days_ago,))
+        deleted_nk = cursor.rowcount
+        
+        cursor.execute("DELETE FROM filtered_duplicates WHERE DATE(created_at) < %s", (three_days_ago,))
+        deleted_dup = cursor.rowcount
+        
+        # Foreign Key 체크 다시 활성화
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
         
         connection.commit()
-        print("✅ DB 초기화 완료")
+        
+        if deleted_main > 0 or deleted_cand > 0:
+            print(f"✅ 오래된 데이터 정리 완료:")
+            print(f"   - Top10: {deleted_main}건")
+            print(f"   - 후보군: {deleted_cand}건")
+            print(f"   - 비한국어: {deleted_nk}건")
+            print(f"   - 중복: {deleted_dup}건")
+        else:
+            print("   (삭제할 오래된 데이터 없음)")
         
     except Error as e:
-        print(f"⚠️ DB 초기화 실패: {e}")
+        print(f"⚠️ 데이터 정리 실패: {e}")
     finally:
         if connection and connection.is_connected():
             cursor.close()
             connection.close()
 
+def clear_today_data():
+    """오늘 날짜 데이터만 초기화 (재실행 대비)"""
+    print("🗑️ 오늘 데이터 초기화 중...")
+    try:
+        connection = mysql.connector.connect(**MYSQL_CONFIG)
+        cursor = connection.cursor()
+        
+        today = datetime.now().strftime("%Y-%m-%d")
+        
+        # Foreign Key 체크 비활성화
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 0")
+        
+        # 오늘 날짜 데이터만 삭제
+        cursor.execute("DELETE FROM candidate_videos WHERE filtered_date = %s", (today,))
+        cursor.execute("DELETE FROM tiktok_videos WHERE DATE(created_at) = %s", (today,))
+        cursor.execute("DELETE FROM filtered_non_korean WHERE filtered_date = %s", (today,))
+        cursor.execute("DELETE FROM filtered_duplicates WHERE filtered_date = %s", (today,))
+        
+        # Foreign Key 체크 다시 활성화
+        cursor.execute("SET FOREIGN_KEY_CHECKS = 1")
+        
+        connection.commit()
+        print("✅ 오늘 데이터 초기화 완료")
+        
+    except Error as e:
+        print(f"⚠️ 초기화 실패: {e}")
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
+
+# ===========================
+# 🗄️ MySQL 저장 함수
+# ===========================
 def save_to_mysql(top10_data, category):
     """Top10 데이터를 MySQL에 저장"""
     try:
@@ -60,8 +118,11 @@ def save_to_mysql(top10_data, category):
         if connection.is_connected():
             cursor = connection.cursor()
             
-            # 해당 카테고리 기존 데이터 삭제
-            cursor.execute("DELETE FROM tiktok_videos WHERE category = %s", (category,))
+            # 해당 카테고리 오늘 날짜 데이터만 삭제
+            today = datetime.now().strftime("%Y-%m-%d")
+            cursor.execute("""DELETE FROM tiktok_videos 
+                            WHERE category = %s AND DATE(created_at) = %s""", 
+                          (category, today))
             print(f"   🗑️ 기존 {category} 데이터 삭제 완료")
             
             # 새 데이터 삽입
@@ -103,18 +164,21 @@ def save_candidates_to_mysql(all_data, top10_ids, category, filtered_date):
         
         # Top10에 속하지 않은 데이터만 필터
         candidates = [item for item in all_data if item.get('id') not in top10_ids]
-        
-        # 조회수 기준 정렬
         candidates = sorted(candidates, key=lambda x: x.get('views', 0), reverse=True)
         
-        # 해당 카테고리 기존 데이터 삭제
-        cursor.execute("DELETE FROM candidate_videos WHERE category = %s AND filtered_date = %s", 
+        # 해당 카테고리 오늘 날짜 데이터만 삭제
+        cursor.execute("""DELETE FROM candidate_videos 
+                         WHERE category = %s AND filtered_date = %s""", 
                       (category, filtered_date))
         
+        # 중복 방지: ON DUPLICATE KEY UPDATE
         sql = """INSERT INTO candidate_videos 
                  (id, title, author, views, likes, category, url, image_url, 
                   rank_in_category, filtered_date) 
-                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"""
+                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 ON DUPLICATE KEY UPDATE 
+                 views=VALUES(views), 
+                 rank_in_category=VALUES(rank_in_category)"""
         
         for rank, item in enumerate(candidates, start=11):
             # 이미지 URL 변환
@@ -169,7 +233,7 @@ def write_execution_log(message):
         log.write(f"[{now}] {message}\n")
 
 def safe_move(src, dst):
-    """폴더/파일 이동 시 이미 존재하면 삭제 후 이동 (shutil.Error 방지)"""
+    """폴더/파일 이동 시 이미 존재하면 삭제 후 이동"""
     src, dst = Path(src), Path(dst)
     if not src.exists(): return
     if dst.exists():
@@ -234,12 +298,12 @@ def process_top10_with_main_merge():
                     main_total_list.append(item)
             except: continue
 
-    # main_data.json 저장 (전체 데이터 합본)
+    # main_data.json 저장
     main_json_path = main_dir / "main_data.json"
     with open(main_json_path, "w", encoding="utf-8") as f:
         json.dump(main_total_list, f, ensure_ascii=False, indent=2)
 
-    # --- Step 2: 모든 폴더(Main 포함)에서 TOP 10 추출 작업 수행 ---
+    # --- Step 2: 모든 폴더(Main 포함)에서 TOP 10 추출 ---
     print(f"🚀 [Step 2] 카테고리별 TOP 10 추출 시작...")
     all_target_dirs = [d for d in base_path.iterdir() if d.is_dir()]
     
@@ -298,7 +362,7 @@ def run_ranking_logic(target_dir, json_path, cat_name):
     with open(top10_dir / f"{cat_name}_top10.json", "w", encoding="utf-8") as f:
         json.dump(final_results, f, ensure_ascii=False, indent=2)
     
-    # ⭐ MySQL 저장
+    # MySQL 저장
     save_to_mysql(final_results, cat_name)
     save_candidates_to_mysql(list(unique_map.values()), top10_ids, cat_name, TARGET_DATE_FOLDER)
     
@@ -333,8 +397,9 @@ def finalize_and_archive(base_path):
 if __name__ == "__main__":
     print(f"🚀 [{TARGET_DATE_FOLDER}] Top10 Ranking Pipeline 시작\n")
     
-    # ⭐ DB 전체 초기화 (새로 시작할 때마다)
-    clear_all_db_data()
+    # ⭐ 날짜 기반 데이터 관리 (파일 시스템과 동일)
+    clear_old_data()      # 3일 이상 된 데이터 삭제
+    clear_today_data()    # 오늘 데이터만 초기화 (재실행 대비)
     
     # 메인 로직 실행
     process_top10_with_main_merge()
