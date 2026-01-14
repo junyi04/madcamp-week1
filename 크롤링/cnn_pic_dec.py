@@ -24,44 +24,52 @@ MYSQL_CONFIG = {
 
 SERVER_DOMAIN = "young-forty.ngrok.app"
 
-def save_duplicates_to_mysql(quarantine_tasks, filtered_date):
-    """중복 이미지를 MySQL에 저장"""
+def save_duplicates_to_mysql(duplicate_data, filtered_date):
+    """중복 이미지 정보를 MySQL에 저장 (날짜별 관리)"""
     try:
         connection = mysql.connector.connect(**MYSQL_CONFIG)
         cursor = connection.cursor()
         
+        # ⭐ 오늘 날짜 데이터만 삭제
+        cursor.execute("DELETE FROM filtered_duplicates WHERE filtered_date = %s", (filtered_date,))
+        print(f"   🗑️ 기존 중복 데이터 삭제 완료")
+        
         sql = """INSERT INTO filtered_duplicates 
                  (id, duplicate_id, original_id, original_path, title, author, 
-                  views, likes, category, url, image_url, similarity_score, filtered_date) 
-                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                  views, likes, category, url, image_url, similarity_score, 
+                  filter_reason, filtered_date) 
+                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                  ON DUPLICATE KEY UPDATE 
                  similarity_score=VALUES(similarity_score)"""
         
-        for task in quarantine_tasks:
-            log = task['log_item']
-            dup_path = Path(log['duplicate_path'])
-            
-            # 이미지 URL (격리소)
-            image_url = f"https://{SERVER_DOMAIN}/duplicates_storage/DUP_{dup_path.name}"
+        for dup in duplicate_data:
+            # 이미지 URL 변환
+            img_path = dup.get('duplicate_path', '')
+            if img_path:
+                local_path = img_path.replace('\\', '/').lstrip('/')
+                image_url = f"https://{SERVER_DOMAIN}/{local_path}"
+            else:
+                image_url = None
             
             cursor.execute(sql, (
-                f"dup_{log['duplicate_id']}",
-                log['duplicate_id'],
-                log['original_id'],
-                log['original_path'],
-                "중복 이미지",  # 제목은 원본 JSON에서 가져오면 더 좋음
-                "",
-                0,
-                0,
-                log['category'],
-                "",
+                f"dup_{dup.get('duplicate_id')}",
+                dup.get('duplicate_id'),
+                dup.get('original_id'),
+                dup.get('original_path', ''),
+                dup.get('title', '제목 없음'),
+                dup.get('author', '알 수 없음'),
+                dup.get('views', 0),
+                dup.get('likes', 0),
+                dup.get('category', ''),
+                dup.get('url', ''),
                 image_url,
-                log['score'],
+                dup.get('similarity', 0.0),
+                'duplicate',
                 filtered_date
             ))
         
         connection.commit()
-        print(f"💾 MySQL 저장: 중복 이미지 {len(quarantine_tasks)}건")
+        print(f"💾 MySQL 저장: 중복 이미지 {len(duplicate_data)}건")
         
     except Error as e:
         print(f"❌ MySQL 에러: {e}")
