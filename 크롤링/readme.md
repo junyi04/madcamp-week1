@@ -822,7 +822,7 @@ MIT License
 Last Updated: 2026-01-14
 
 Version: 2.1.0
-
-Author: 김건희
 #
+#### 개발자
+> 강준이, 김건희
 ⭐ Star this project if you find it helpful!
