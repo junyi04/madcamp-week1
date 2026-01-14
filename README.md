@@ -38,7 +38,7 @@
 
 ### 1. 홈 화면 (Top 10)
 
-![Home Screen](https://via.placeholder.com/800x400?text=Top+10+Screen)
+![Home Screen](images/home_screen.png)
 
 - **매일 자정 업데이트**: 틱톡에서 가장 인기 있는 밈 Top 10을 매일 자동 업데이트
 - **영상 정보 표시**:
@@ -52,7 +52,7 @@
 
 ### 2. 카테고리 화면
 
-![Categories Screen](https://via.placeholder.com/800x400?text=Categories+Screen)
+![Categories Screen](images/category_dance.png)
 
 4가지 주요 카테고리로 구성:
 - **춤**: 유행하는 댄스 챌린지
@@ -64,7 +64,7 @@
 
 ### 3. 출석체크 화면
 
-![Attendance Screen](https://via.placeholder.com/800x400?text=Attendance+Screen)
+![Attendance Screen](images/attendace_check.png)
 
 - **달력 UI**: 월간 출석 현황 한눈에 확인
 - **출석 통계**:
@@ -74,42 +74,34 @@
 - **자동 출석**: 앱 실행 시 자동으로 오늘 출석 체크
 - **보상 시스템**: 연속 출석 시 특별 보상 제공
 
-### 4. 알림 화면
+### 4. 3컷 만화 화면
 
-- 매일 자정 Top 10 업데이트 알림
-- Firebase Cloud Messaging (FCM) 기반 푸시 알림
-- 알림 설정 관리
+- 순수 재미를 위한 3컷 만화
+- **영포티** 아자스! 
 
 ---
 
 ## 🛠️ 기술 스택
-
-### Android
+### Client
+---
+#### Android
 
 - **Language**: Kotlin 2.0.21
 - **Min SDK**: API 24 (Android 7.0)
 - **Target SDK**: API 34 (Android 14)
 
-### UI Framework
+#### UI Framework
 
 - **Jetpack Compose**: 모던한 UI 구현 (출석체크, 온보딩)
 - **Material Design 3**: 일관된 디자인 시스템
 - **XML Layouts**: 기존 뷰 시스템 활용
 
-### Architecture & Libraries
-
 #### 네트워킹
-- **Retrofit 2.9.0**: REST API 통신
+- **Retrofit2**: REST API 서버 통신 
 - **Gson Converter**: JSON 데이터 파싱
 
 #### 이미지 로딩
 - **Glide 4.16.0**: 효율적인 이미지 캐싱 및 로딩
-
-#### Firebase
-- **Firebase BOM 33.7.0**
-    - Firebase Analytics
-    - Firebase Cloud Messaging (FCM)
-    - Firestore (데이터 저장)
 
 #### UI Components
 - **RecyclerView**: 리스트 렌더링
@@ -120,30 +112,29 @@
 - **Compose BOM 2024.02.00**
 - **Material3**: Compose용 Material Design 3
 - **Material Icons Extended**: 확장 아이콘 세트
-
 ---
+### Backend(자세한 내용은 크롤링/readme.md)
+---
+#### Server
+- **Language**: Python 3.8+
+- **Architecture**: REST API Architecture
 
-## 🎨 디자인 시스템
+#### Framework & Server
+- **FastAPI**: 고성능 비동기 REST API 서버 구축
+- **Uvicorn**: ASGI 웹 서버 (FastAPI 구동)
+- **APScheduler**: 매일 자정 크롤링 파이프라인 자동화
 
-### Color Palette
+#### Database & Infra
+- **MySQL 8.0**: 메타데이터 영구 저장 및 3일 주기 데이터 관리
+- **ngrok**: HTTPS 터널링을 통한 외부 접속 환경 제공
 
-앱은 레트로 사이버펑크 스타일의 색상 팔레트를 사용합니다:
+#### AI & Machine Learning
+- **PyTorch & torchvision**: 딥러닝 모델(ResNet50) 구동 및 추론
+- **FaceNet**: 얼굴 특징 추출 및 유사도 분석
+- **Google Cloud Translation API**: 한국어 콘텐츠 이중 검증(NLP)
 
-```kotlin
-val RetroDark = Color(0xFF1A1A2E)      // 배경색
-val RetroPink = Color(0xFFFF10F0)      // 강조색 1
-val RetroPurple = Color(0xFFB300FF)    // 강조색 2
-val RetroCyan = Color(0xFF00FFFF)      // 주요 액센트
-val RetroYellow = Color(0xFFFFFF00)    // 보조 액센트
-val RetroOrange = Color(0xFFFF6600)    // 알림색
-```
-
-### Typography
-
-- **PressStart**: 레트로 게임 스타일 (제목용)
-- **DungGeunMo**: 한글 픽셀 폰트 (본문용)
-- **Fredoka**: 부드러운 산세리프 (보조용)
-
+#### Crawling
+- **Playwright**: 네트워크 패킷 인터셉트 기반 고품질 데이터 수집
 ---
 
 ## 🔧 설치 및 실행
@@ -153,6 +144,9 @@ val RetroOrange = Color(0xFFFF6600)    // 알림색
 - Android Studio Hedgehog (2023.1.1) 이상
 - JDK 17 이상
 - Android SDK API 34
+- Python 3.8 이상
+- MySQL 8.0 이상
+- Chrome Browser (Playwright용)
 
 ### 설치 방법
 
@@ -162,11 +156,11 @@ git clone https://github.com/yourusername/madcamp_week1.git
 cd madcamp_week1
 ```
 
-2. **Firebase 설정**
-    - Firebase Console에서 프로젝트 생성
-    - `google-services.json` 파일을 `app/` 디렉토리에 추가
-    - FCM 설정 완료
-
+2. **서버 연동 설정 (FastAPI & Ngrok)**
+    - 필수: 백엔드(main.py) 실행 후 생성된 ngrok URL이 필요
+    - ngrok에서 토큰을 받아와 ngrok.yml 넣고 저장
+    - 서버 실행시
+    > ngrok http 8001
 3. **서버 URL 설정**
 
    `MainActivity.kt`, `CategoriesActivity.kt`에서 ngrok URL 설정:
@@ -188,6 +182,7 @@ cd madcamp_week1
 ### Base URL
 ```
 https://your-server.ngrok-free.dev/
+# (주의: ngrok 실행 시마다 변경되는 도메인을 사용해야 합니다)
 ```
 
 ### Endpoints
@@ -201,13 +196,13 @@ GET /top10
 ```json
 [
   {
-    "id": "video_001",
+    "id": "dance05",
     "title": "제목",
     "author": "작성자",
     "views": 1234567,
     "likes": 50000,
     "url": "https://tiktok.com/@user/video/123",
-    "imageFile": "https://cdn.tiktok.com/thumb.jpg",
+    "imageFile": "imageFile": "https://your-server.ngrok-free.dev/2026-01-14/main/top10/thumbnails/dance05.jpg",
     "category": "dance"
   }
 ]
@@ -215,7 +210,7 @@ GET /top10
 
 #### 2. 카테고리별 영상 조회
 ```http
-GET /category/{name}
+GET /api/category/{name}
 ```
 
 **Parameters:**
@@ -225,14 +220,14 @@ GET /category/{name}
 ```json
 [
   {
-    "id": "video_002",
+    "id": "dance05",
     "title": "챌린지 제목",
     "author": "작성자",
     "views": 987654,
     "likes": 30000,
     "url": "https://tiktok.com/@user/video/456",
-    "imageFile": "https://cdn.tiktok.com/thumb2.jpg",
-    "category": "challenge"
+    "imageFile": "https://your-server.ngrok-free.dev/2026-01-14/dance/top10/thumbnails/dance05.jpg",
+    "category": "dance"
   }
 ]
 ```
@@ -327,6 +322,90 @@ private fun fetchCategoryDataFromServer(categoryName: String, uiTitle: String) {
 }
 ```
 
+### 5. 서버 이미지 렌더링 (Glide)
+
+FastAPI 서버(Ngrok)에서 서빙하는 로컬 이미지를 효율적으로 로딩 및 캐싱:
+
+~~~
+Glide.with(context)
+    .load(videoData.imageFile) // 서버의 ngrok URL (예: https://.../dance01.jpg)
+    .diskCacheStrategy(DiskCacheStrategy.ALL) // 리소스 절약을 위한 캐싱
+    .placeholder(R.drawable.placeholder)
+    .into(binding.thumbnailImageView)
+~~~
+
+### 6. 틱톡 딥링크 연동 (Intent)
+
+'보기' 버튼 클릭 시 틱톡 앱으로 바로 이동하거나 웹으로 연결:
+
+~~~
+val intent = Intent(Intent.ACTION_VIEW, Uri.parse(videoData.url))
+try {
+    // 틱톡 앱이 설치되어 있으면 앱으로 실행
+    startActivity(intent)
+} catch (e: ActivityNotFoundException) {
+    // 없으면 브라우저로 틱톡 웹페이지 실행
+    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(videoData.url)))
+}
+~~~
+
+### 7. [Backend] AI 중복 제거 파이프라인
+
+ResNet50과 FaceNet을 활용하여 수집된 밈의 이미지 유사도를 분석, 중복 콘텐츠(유사도 0.82 이상)를 자동 필터링:
+
+~~~
+# cnn_pic_dec.py (Core Logic)
+def check_duplicate(new_img_path, existing_imgs):
+    vec1 = get_feature_vector(new_img_path) # ResNet50 특징 추출
+    
+    for img in existing_imgs:
+        vec2 = get_feature_vector(img)
+        similarity = cosine_similarity(vec1, vec2)
+        
+        if similarity > 0.82: # 임계값 초과 시 중복 판정
+            return True, img
+            
+    return False, None
+~~~
+
+### 8. [Backend] 지능형 크롤링 (Playwright)
+
+봇 탐지를 우회하고 네트워크 패킷을 직접 가로채어(Interception) 고품질 데이터 수집:
+
+~~~
+# crawling.py
+async def intercept_response(route, request):
+    if "/api/recommend/item_list" in request.url:
+        data = await route.fetch()
+        json_data = await data.json()
+        
+        # 조회수 10만 이상 & 한국어 영상만 필터링하여 저장
+        process_video_data(json_data) 
+        
+    await route.continue_()
+~~~
+
+### 9. [Backend] 데이터 수명 주기 관리 (MySQL)
+
+FastAPI 서버와 MySQL을 연동하여 데이터를 영구 저장하고, 최신 트렌드 유지를 위해 3일이 지난 데이터(파일 및 DB 로그)를 자동으로 소각하는 로직 구현:
+
+~~~
+# top10_filter.py (Data Retention Policy)
+def cleanup_old_data(conn):
+    cursor = conn.cursor()
+    # 3일 전 날짜 계산
+    limit_date = (datetime.now() - timedelta(days=3)).strftime('%Y-%m-%d')
+    
+    # 1. DB 메타데이터 삭제
+    sql = "DELETE FROM tiktok_videos WHERE DATE(created_at) < %s"
+    cursor.execute(sql, (limit_date,))
+    
+    # 2. 로컬 이미지 파일 삭제 (스토리지 최적화)
+    if os.path.exists(old_folder_path):
+        shutil.rmtree(old_folder_path)
+        
+    conn.commit()
+~~~
 ---
 
 ## 👥 개발팀

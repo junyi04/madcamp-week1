@@ -6,7 +6,70 @@ from pathlib import Path
 from google.cloud import translate_v2 as translate
 from tqdm import tqdm
 from datetime import datetime
+import mysql.connector
+from mysql.connector import Error
 
+MYSQL_CONFIG = {
+    'host': 'localhost',
+    'database': 'madcamp1_db',
+    'user': 'root',
+    'password': '4038'  # 비밀번호 변경
+}
+
+SERVER_DOMAIN = "young-forty.ngrok.app"
+
+def save_filtered_to_mysql(filtered_data, category, filtered_date):
+    """한국어 아닌 콘텐츠를 MySQL에 저장 (날짜별 관리)"""
+    try:
+        connection = mysql.connector.connect(**MYSQL_CONFIG)
+        cursor = connection.cursor()
+        
+        # ⭐ 해당 카테고리 오늘 날짜 데이터만 삭제
+        cursor.execute("""DELETE FROM filtered_non_korean 
+                         WHERE category = %s AND filtered_date = %s""", 
+                      (category, filtered_date))
+        print(f"   🗑️ 기존 {category} 필터 데이터 삭제 완료")
+        
+        sql = """INSERT INTO filtered_non_korean 
+                 (id, original_id, title, author, views, likes, category, 
+                  url, image_url, filter_reason, detected_language, filtered_date) 
+                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 ON DUPLICATE KEY UPDATE 
+                 detected_language=VALUES(detected_language)"""
+        
+        for item in filtered_data:
+            # 이미지 URL 변환
+            img_path = item.get('image_file', '')
+            if img_path:
+                local_path = img_path.replace('\\', '/').lstrip('/')
+                image_url = f"https://{SERVER_DOMAIN}/{local_path}"
+            else:
+                image_url = None
+            
+            cursor.execute(sql, (
+                f"nk_{category}_{item.get('id')}",
+                item.get('id'),
+                item.get('title', '제목 없음'),
+                item.get('author', '알 수 없음'),
+                item.get('views', 0),
+                item.get('likes', 0),
+                category,
+                item.get('url', ''),
+                image_url,
+                'non_korean',
+                item.get('detected_language', 'unknown'),
+                filtered_date
+            ))
+        
+        connection.commit()
+        print(f"   💾 MySQL 저장: {category} 한국어 아닌 것 {len(filtered_data)}건")
+        
+    except Error as e:
+        print(f"   ❌ MySQL 에러: {e}")
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
 # ===========================
 # 🎛️ 설정 영역
 # ===========================
@@ -50,7 +113,8 @@ if __name__ == "__main__":
         cat_name = json_path.parent.name
         filtered_data = []
         removed_count = 0
-        
+        removed_data = []  # ⭐ 추가: 제거된 데이터 저장
+
         try:
             with open(json_path, "r", encoding="utf-8") as f:
                 # ⭐ [핵심 수정] 표준 JSON 배열 형식을 리스트로 읽기
@@ -71,6 +135,7 @@ if __name__ == "__main__":
             if is_korean:
                 filtered_data.append(data)
             else:
+                removed_data.append(data)
                 # 격리소 이동 로직
                 os.makedirs(QUARANTINE_FOLDER, exist_ok=True)
                 img_p = Path(img_file)
@@ -86,6 +151,8 @@ if __name__ == "__main__":
         # ⭐ [핵심 수정] 필터링된 결과물도 다시 표준 배열 형식으로 저장
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(filtered_data, f, ensure_ascii=False, indent=2)
+        if removed_data:
+            save_filtered_to_mysql(removed_data, cat_name, TARGET_DATE_FOLDER)
         
         print(f"   ✅ {cat_name}: {removed_count}개 제외 완료")
 

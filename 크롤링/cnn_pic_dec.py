@@ -12,18 +12,81 @@ from tqdm import tqdm
 from datetime import datetime
 from facenet_pytorch import MTCNN, InceptionResnetV1
 from sklearn.metrics.pairwise import cosine_similarity
+import mysql.connector
+from mysql.connector import Error
 
+MYSQL_CONFIG = {
+    'host': 'localhost',
+    'database': 'madcamp1_db',
+    'user': 'root',
+    'password': '4038'
+}
+
+SERVER_DOMAIN = "young-forty.ngrok.app"
+
+def save_duplicates_to_mysql(duplicate_data, filtered_date):
+    """중복 이미지 정보를 MySQL에 저장 (날짜별 관리)"""
+    try:
+        connection = mysql.connector.connect(**MYSQL_CONFIG)
+        cursor = connection.cursor()
+        
+        # ⭐ 오늘 날짜 데이터만 삭제
+        cursor.execute("DELETE FROM filtered_duplicates WHERE filtered_date = %s", (filtered_date,))
+        print(f"   🗑️ 기존 중복 데이터 삭제 완료")
+        
+        sql = """INSERT INTO filtered_duplicates 
+                 (id, duplicate_id, original_id, original_path, title, author, 
+                  views, likes, category, url, image_url, similarity_score, 
+                  filter_reason, filtered_date) 
+                 VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                 ON DUPLICATE KEY UPDATE 
+                 similarity_score=VALUES(similarity_score)"""
+        
+        for dup in duplicate_data:
+            # 이미지 URL 변환
+            img_path = dup.get('duplicate_path', '')
+            if img_path:
+                local_path = img_path.replace('\\', '/').lstrip('/')
+                image_url = f"https://{SERVER_DOMAIN}/{local_path}"
+            else:
+                image_url = None
+            
+            cursor.execute(sql, (
+                f"dup_{dup.get('duplicate_id')}",
+                dup.get('duplicate_id'),
+                dup.get('original_id'),
+                dup.get('original_path', ''),
+                dup.get('title', '제목 없음'),
+                dup.get('author', '알 수 없음'),
+                dup.get('views', 0),
+                dup.get('likes', 0),
+                dup.get('category', ''),
+                dup.get('url', ''),
+                image_url,
+                dup.get('similarity', 0.0),
+                'duplicate',
+                filtered_date
+            ))
+        
+        connection.commit()
+        print(f"💾 MySQL 저장: 중복 이미지 {len(duplicate_data)}건")
+        
+    except Error as e:
+        print(f"❌ MySQL 에러: {e}")
+    finally:
+        if connection and connection.is_connected():
+            cursor.close()
+            connection.close()
 # ===========================
 # 🎛️ RTX 4060 환경 및 정밀도 설정
 # ===========================
-SIMILARITY_THRESHOLD = 0.92  # 틱톡 배경 중복 방지를 위해 약간 상향
-W_COSINE = 0.3               # ResNet 3-Pass 가중치 (50%)
-W_FACE = 0.7                 # FaceNet 얼굴 가중치 (50%)
+SIMILARITY_THRESHOLD = 0.92 
+W_COSINE = 0.3 
+W_FACE = 0.7 
 TARGET_DATE_FOLDER = datetime.now().strftime("%Y-%m-%d") 
 QUARANTINE_FOLDER = "duplicates_storage" 
 QUARANTINE_JSON_LOG = os.path.join(QUARANTINE_FOLDER, "quarantined_json_data.json")
 
-# 경로 에러 방지 설정
 project_root = Path.cwd()
 model_cache_dir = project_root / "models_cache"
 model_cache_dir.mkdir(parents=True, exist_ok=True)
@@ -33,11 +96,9 @@ torch.hub.set_dir(str(model_cache_dir))
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# 1. 모델 로드 (FaceNet/MTCNN 기반 시각화 준비)
+# 모델 로드 (FaceNet/MTCNN 기반 시각화 준비)
 resnet50 = models.resnet50(weights=models.ResNet50_Weights.DEFAULT)
 resnet50 = nn.Sequential(*list(resnet50.children())[:-1]).to(device).eval()
-
-# MTCNN: 얼굴 좌표(Box) 추출을 위해 post_process=False 유지
 mtcnn = MTCNN(keep_all=False, device=device, post_process=False) 
 facenet = InceptionResnetV1(pretrained='vggface2').to(device).eval()
 
@@ -62,20 +123,28 @@ def get_face_info(img_p):
     return None, None, False
 
 def move_and_visualize_with_log(src_path, dest_path, box, log_item):
-    """얼굴 박스 시각화, 파일 이동 및 상세 비교 로그 기록"""
+    """[복구] 한글 경로 대응 및 얼굴 박스 시각화 로직"""
     os.makedirs(QUARANTINE_FOLDER, exist_ok=True)
-    img = cv2.imread(str(src_path))
     
-    if img is not None and box is not None:
-        # 얼굴에 초록색 박스 그리기 (FaceNet 좌표 활용)
-        x1, y1, x2, y2 = map(int, box)
-        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
-        cv2.putText(img, "AI DUPLICATE", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+    # 📍 한글 경로 대응 로드
+    try:
+        img_array = np.fromfile(str(src_path), np.uint8)
+        img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+    except: img = None
     
-    cv2.imwrite(str(dest_path), img)
-    if os.path.exists(src_path): os.remove(src_path)
+    if img is not None:
+        if box is not None:
+            # 얼굴에 초록색 박스 그리기
+            x1, y1, x2, y2 = map(int, box)
+            cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 0), 3)
+            cv2.putText(img, "AI DUPLICATE", (x1, y1 - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 255, 0), 2)
+        
+        # 한글 경로 대응 저장
+        _, img_encoded = cv2.imencode('.jpg', img)
+        img_encoded.tofile(str(dest_path))
+        if os.path.exists(src_path): os.remove(src_path)
     
-    # ⭐ [핵심 추가] 비교 원본 정보가 포함된 로그 저장
+    # 상세 비교 로그 기록
     with open(QUARANTINE_JSON_LOG, "a", encoding="utf-8") as f:
         f.write(json.dumps(log_item, ensure_ascii=False) + "\n")
 
@@ -88,7 +157,7 @@ if __name__ == "__main__":
     for p in tqdm(all_paths, desc="🧠 특징 추출 및 분석"):
         try:
             img = Image.open(p).convert('RGB')
-            # 1. ResNet 3-Pass 추출
+            # 1. ResNet 3-Pass 추출 [복구]
             with torch.no_grad():
                 f_avg = (resnet50(preprocess["center"](img).unsqueeze(0).to(device)) +
                          resnet50(preprocess["full"](img).unsqueeze(0).to(device)) +
@@ -128,7 +197,6 @@ if __name__ == "__main__":
                 p_pi, p_pj = Path(pi), Path(pj)
                 cat = p_pj.parent.parent.name
                 
-                # ⭐ [핵심 추가] 비교 대상 정보를 로그 아이템으로 구성
                 log_item = {
                     "duplicate_id": p_pj.stem,
                     "duplicate_path": pj,
@@ -140,25 +208,28 @@ if __name__ == "__main__":
                 }
                 
                 quarantine_tasks.append({
-                    "src": pj,
-                    "box": face_data.get(pj, {}).get("box"),
-                    "log_item": log_item
+                    "src": pj, "box": face_data.get(pj, {}).get("box"), "log_item": log_item
                 })
 
                 if cat not in deleted_info_by_cat: deleted_info_by_cat[cat] = []
                 deleted_info_by_cat[cat].append(p_pj.stem)
 
+    # 📦 파일 이동 및 시각화 수행
     print(f"📦 {len(deleted_indices)}개 중복 격리 중 (비교 로그 생성)")
     for task in quarantine_tasks:
         dest = Path(QUARANTINE_FOLDER) / f"DUP_{Path(task['src']).name}"
         move_and_visualize_with_log(task['src'], dest, task['box'], task['log_item'])
+    
+    if quarantine_tasks:
+        save_duplicates_to_mysql(quarantine_tasks, TARGET_DATE_FOLDER)
 
-    # JSON 업데이트 및 제목 없음 보정 (기존 기능 유지)
+    # 💾 [복구] 카테고리별 JSON 갱신 및 제목 없음 보정
     for cat, d_ids in deleted_info_by_cat.items():
         j_path = Path(TARGET_DATE_FOLDER) / cat / f"{cat}_data.json"
         if j_path.exists():
             with open(j_path, "r", encoding="utf-8") as f:
                 data_list = json.load(f)
+            # 중복 ID 제거
             new_list = [item for item in data_list if item.get("id") not in d_ids]
             # 제목 보정
             for item in new_list:
@@ -167,4 +238,4 @@ if __name__ == "__main__":
             with open(j_path, "w", encoding="utf-8") as f:
                 json.dump(new_list, f, ensure_ascii=False, indent=2)
 
-    print("🎉 비교 정보가 포함된 정제 작업 완료.")
+    print("🎉 모든 정밀 정제 작업이 완료되었습니다.")
