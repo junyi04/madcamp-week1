@@ -97,7 +97,7 @@
 - **XML Layouts**: 기존 뷰 시스템 활용
 
 #### 네트워킹
-- **Retrofit2**: FAST API 서버 통신 
+- **Retrofit2**: REST API 서버 통신 
 - **Gson Converter**: JSON 데이터 파싱
 
 #### 이미지 로딩
