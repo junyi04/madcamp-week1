@@ -84,13 +84,13 @@
 ## 🛠️ 기술 스택
 ### Client
 ---
-### Android
+#### Android
 
 - **Language**: Kotlin 2.0.21
 - **Min SDK**: API 24 (Android 7.0)
 - **Target SDK**: API 34 (Android 14)
 
-### UI Framework
+#### UI Framework
 
 - **Jetpack Compose**: 모던한 UI 구현 (출석체크, 온보딩)
 - **Material Design 3**: 일관된 디자인 시스템
@@ -115,11 +115,11 @@
 ---
 ### Backend
 ---
-### Server
+#### Server
 - **Language**: Python 3.8+
 - **Architecture**: REST API Architecture
 
-### Framework & Server
+#### Framework & Server
 - **FastAPI**: 고성능 비동기 REST API 서버 구축
 - **Uvicorn**: ASGI 웹 서버 (FastAPI 구동)
 - **APScheduler**: 매일 자정 크롤링 파이프라인 자동화
