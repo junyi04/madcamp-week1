@@ -113,7 +113,7 @@
 - **Material3**: Compose용 Material Design 3
 - **Material Icons Extended**: 확장 아이콘 세트
 ---
-### Backend
+### Backend(자세한 내용은 크롤링/readme.md)
 ---
 #### Server
 - **Language**: Python 3.8+
